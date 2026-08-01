@@ -19,7 +19,7 @@ import {
 	setCapabilities,
 	type TerminalCapabilities,
 } from "./terminal-image.ts";
-import { type Component, CURSOR_MARKER, compositeTuiLine, TuiBase, VIEWPORT_TUI, type ViewportTUI } from "./tui.ts";
+import { type Component, compositeTuiLine, stripCursorMarker, TuiBase, VIEWPORT_TUI, type ViewportTUI } from "./tui.ts";
 import {
 	extractAnsiCode,
 	getGraphemeCellRange,
@@ -205,9 +205,10 @@ export class TuiAltScreen extends TuiBase implements ViewportTUI {
 		this.altScreenActive = false;
 		const width = Math.max(1, this.terminal.columns);
 		const documentLines = this.render(width).map((line) => line.replace(OSC133_ZONE_PREFIX, ""));
-		this.lastDocument = this.applyLineResets(documentLines.map((line) => line.replaceAll(CURSOR_MARKER, ""))).map(
-			(line) => (isImageLine(line) || visibleWidth(line) <= width ? line : sliceByColumn(line, 0, width, true)),
-		);
+		const stripSoftwareCursor = this.getShowHardwareCursor();
+		this.lastDocument = this.applyLineResets(
+			documentLines.map((line) => stripCursorMarker(line, stripSoftwareCursor)),
+		).map((line) => (isImageLine(line) || visibleWidth(line) <= width ? line : sliceByColumn(line, 0, width, true)));
 		let buffer = `${BEGIN_SYNCHRONIZED_OUTPUT}${EXIT_ALT_SCREEN}${DISABLE_AUTOWRAP}`;
 		for (let row = 0; row < this.lastDocument.length; row++) {
 			if (row > 0) buffer += "\r\n";

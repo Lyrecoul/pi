@@ -197,8 +197,6 @@ export class TuiMainScreen extends TuiBase implements TUI {
 				}
 				buffer += line;
 			}
-			buffer += "\x1b[?2026l"; // End synchronized output
-			this.terminal.write(buffer);
 			this.cursorRow = Math.max(0, newLines.length - 1);
 			this.hardwareCursorRow = this.cursorRow;
 			// Reset max lines when clearing, otherwise track growth
@@ -209,7 +207,14 @@ export class TuiMainScreen extends TuiBase implements TUI {
 			}
 			const bufferLength = Math.max(height, newLines.length);
 			this.previousViewportTop = Math.max(0, bufferLength - height);
-			this.positionHardwareCursor(cursorPos, newLines.length);
+			// Position the hardware cursor inside the synchronized output block so the
+			// terminal never leaves the cursor at the line end between the render write
+			// and the cursor reposition. An IME that queries the cursor position in that
+			// gap (e.g. on composition start) would otherwise anchor its candidate
+			// window at the right edge of the input line.
+			buffer += this.buildHardwareCursorSequence(cursorPos, newLines.length);
+			buffer += "\x1b[?2026l";
+			this.terminal.write(buffer);
 			this.previousLines = newLines;
 			this.previousKittyImageIds = this.collectKittyImageIds(newLines);
 			this.previousWidth = width;
@@ -329,12 +334,14 @@ export class TuiMainScreen extends TuiBase implements TUI {
 				if (moveBack > 0) {
 					buffer += `\x1b[${moveBack}A`;
 				}
-				buffer += "\x1b[?2026l";
-				this.terminal.write(buffer);
 				this.cursorRow = targetRow;
 				this.hardwareCursorRow = targetRow;
+				buffer += this.buildHardwareCursorSequence(cursorPos, newLines.length);
+				buffer += "\x1b[?2026l";
+				this.terminal.write(buffer);
+			} else {
+				this.positionHardwareCursor(cursorPos, newLines.length);
 			}
-			this.positionHardwareCursor(cursorPos, newLines.length);
 			this.previousLines = newLines;
 			this.previousKittyImageIds = this.collectKittyImageIds(newLines);
 			this.previousWidth = width;
@@ -460,6 +467,21 @@ export class TuiMainScreen extends TuiBase implements TUI {
 			buffer += `\x1b[${extraLines}A`;
 		}
 
+		// Track cursor position for next render
+		// cursorRow tracks end of content (for viewport calculation)
+		// hardwareCursorRow tracks actual terminal cursor position (for movement)
+		this.cursorRow = Math.max(0, newLines.length - 1);
+		this.hardwareCursorRow = finalCursorRow;
+		// Track terminal's working area (grows but doesn't shrink unless cleared)
+		this.maxLinesRendered = Math.max(this.maxLinesRendered, newLines.length);
+		this.previousViewportTop = Math.max(prevViewportTop, finalCursorRow - height + 1);
+
+		// Position the hardware cursor inside the synchronized output block so the
+		// terminal never leaves the cursor at the line end between the render write
+		// and the cursor reposition. An IME that queries the cursor position in that
+		// gap (e.g. on composition start) would otherwise anchor its candidate
+		// window at the right edge of the input line.
+		buffer += this.buildHardwareCursorSequence(cursorPos, newLines.length);
 		buffer += "\x1b[?2026l"; // End synchronized output
 
 		if (process.env.PI_TUI_DEBUG === "1") {
@@ -494,18 +516,6 @@ export class TuiMainScreen extends TuiBase implements TUI {
 		// Write entire buffer at once
 		this.terminal.write(buffer);
 
-		// Track cursor position for next render
-		// cursorRow tracks end of content (for viewport calculation)
-		// hardwareCursorRow tracks actual terminal cursor position (for movement)
-		this.cursorRow = Math.max(0, newLines.length - 1);
-		this.hardwareCursorRow = finalCursorRow;
-		// Track terminal's working area (grows but doesn't shrink unless cleared)
-		this.maxLinesRendered = Math.max(this.maxLinesRendered, newLines.length);
-		this.previousViewportTop = Math.max(prevViewportTop, finalCursorRow - height + 1);
-
-		// Position hardware cursor for IME
-		this.positionHardwareCursor(cursorPos, newLines.length);
-
 		this.previousLines = newLines;
 		this.previousKittyImageIds = this.collectKittyImageIds(newLines);
 		this.previousWidth = width;
@@ -513,14 +523,14 @@ export class TuiMainScreen extends TuiBase implements TUI {
 	}
 
 	/**
-	 * Position the hardware cursor for IME candidate window.
+	 * Build the escape sequences that position the hardware cursor for the IME
+	 * candidate window, relative to the current cursor position.
 	 * @param cursorPos The cursor position extracted from rendered output, or null
 	 * @param totalLines Total number of rendered lines
 	 */
-	private positionHardwareCursor(cursorPos: { row: number; col: number } | null, totalLines: number): void {
+	private buildHardwareCursorSequence(cursorPos: { row: number; col: number } | null, totalLines: number): string {
 		if (!cursorPos || totalLines <= 0) {
-			this.terminal.hideCursor();
-			return;
+			return "\x1b[?25l";
 		}
 
 		// Clamp cursor position to valid range
@@ -538,15 +548,17 @@ export class TuiMainScreen extends TuiBase implements TUI {
 		// Move to absolute column (1-indexed)
 		buffer += `\x1b[${targetCol + 1}G`;
 
-		if (buffer) {
-			this.terminal.write(buffer);
-		}
-
 		this.hardwareCursorRow = targetRow;
 		if (this.getShowHardwareCursor()) {
-			this.terminal.showCursor();
+			buffer += "\x1b[?25h";
 		} else {
-			this.terminal.hideCursor();
+			buffer += "\x1b[?25l";
 		}
+		return buffer;
+	}
+
+	/** Write the hardware cursor positioning sequences to the terminal. */
+	private positionHardwareCursor(cursorPos: { row: number; col: number } | null, totalLines: number): void {
+		this.terminal.write(this.buildHardwareCursorSequence(cursorPos, totalLines));
 	}
 }

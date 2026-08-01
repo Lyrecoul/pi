@@ -65,7 +65,7 @@ Pi 使用 JSON 设置文件，项目设置覆盖全局设置。
 | `editorPaddingX` | number | `0` | 输入编辑器的水平内边距（0-3） |
 | `outputPad` | number | `1` | 用户消息、助手消息和思维的水平内边距（0 或 1） |
 | `autocompleteMaxVisible` | number | `5` | 自动补全下拉菜单中可见的最大项数（3-20） |
-| `showHardwareCursor` | boolean | `false` | 在 TUI 定位光标以支持 IME 时显示终端光标 |
+| `showHardwareCursor` | boolean | `false` | 在 TUI 定位光标以支持 IME 时显示终端光标；启用后隐藏软件光标，只保留终端光标，避免双重光标 |
 | `uiMode` | string | `"regular"` | 交互 UI 模式：`"regular"` 或实验性的 `"fullscreen"`。通过 `/settings` 的更改在重启后生效；`--ui-mode` 在单次运行中覆盖此设置 |
 | `fullscreenScrollbar` | string | `"auto"` | 全屏转录滚动条：`"auto"` 在滚动时临时显示，`"always"` 保留最右列并保持可见，`"hidden"` 隐藏它。在普通 UI 模式下无效 |
 

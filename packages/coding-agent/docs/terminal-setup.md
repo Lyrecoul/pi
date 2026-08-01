@@ -60,7 +60,7 @@ return config
 
 如果你已经有 `config.keys` 表，请将条目添加到其中。
 
-在 WSL 上，WezTerm 可能需要可见的硬件光标来定位 IME 候选窗口。如果 CJK IME 候选不跟随文本光标，请在运行 pi 前设置 `PI_HARDWARE_CURSOR=1`，或在设置中设置 `showHardwareCursor` 为 `true`。
+在 WSL 上，WezTerm 可能需要可见的硬件光标来定位 IME 候选窗口。如果 CJK IME 候选不跟随文本光标，请在运行 pi 前设置 `PI_HARDWARE_CURSOR=1`，或在设置中设置 `showHardwareCursor` 为 `true`。启用后，TUI 会隐藏软件光标，只显示终端光标，避免出现双重光标。
 
 ## Alacritty
 

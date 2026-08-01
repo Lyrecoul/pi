@@ -122,6 +122,7 @@ export {
 	type OverlayOptions,
 	type OverlayUnfocusOptions,
 	type SizeValue,
+	stripCursorMarker,
 	type TUI,
 	type TuiInputListener,
 	type TuiInputListenerResult,

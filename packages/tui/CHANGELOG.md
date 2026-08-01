@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Fixed the hardware cursor being left at the line end between the render write and the cursor reposition in the main-screen renderer, which could anchor IME candidate windows at the right edge of the input line when composition started during a render; the cursor is now positioned inside the synchronized output block.
+- Fixed the double-cursor appearance when `showHardwareCursor` is enabled: the software cursor is now stripped at the marker position so only the hardware cursor remains visible for IME candidate-window placement.
 - Fixed terminal width accounting for Indic conjunct grapheme clusters ([#6124](https://github.com/earendil-works/pi/issues/6124) by [@petrroll](https://github.com/petrroll)).
 - Fixed phantom alternate-screen text selection from unmatched mouse events when changing terminal pane focus.
 - Fixed spaces in searchable settings queries changing the selected value instead of filtering multi-word labels.

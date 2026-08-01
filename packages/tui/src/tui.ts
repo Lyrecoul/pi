@@ -78,6 +78,42 @@ export function isFocusable(component: Component | null): component is Component
  */
 export const CURSOR_MARKER = "\x1b_pi:c\x07";
 
+const REVERSE_VIDEO_ON = "\x1b[7m";
+const SGR_RESET = "\x1b[0m";
+const CURSOR_CELL_RESET = /\x1b\[(?:27|0)m/;
+
+/**
+ * Strip the cursor marker from a rendered line.
+ *
+ * When `stripSoftwareCursor` is true (hardware cursor shown for IME), also
+ * remove the reverse-video software cursor cell emitted right after the
+ * marker, so only the hardware cursor is visible at the cursor position.
+ */
+export function stripCursorMarker(line: string, stripSoftwareCursor: boolean): string {
+	const markerIndex = line.indexOf(CURSOR_MARKER);
+	if (markerIndex === -1) return line;
+
+	const beforeMarker = line.slice(0, markerIndex);
+	let afterMarker = line.slice(markerIndex + CURSOR_MARKER.length);
+
+	if (stripSoftwareCursor && afterMarker.startsWith(REVERSE_VIDEO_ON)) {
+		const afterReverseOn = afterMarker.slice(REVERSE_VIDEO_ON.length);
+		const reset = CURSOR_CELL_RESET.exec(afterReverseOn);
+		if (reset) {
+			const cursorCell = afterReverseOn.slice(0, reset.index);
+			const afterReset = afterReverseOn.slice(reset.index + reset[0].length);
+			// Keep a full SGR reset so any styles applied before the cursor cell
+			// remain bounded; drop the reverse-video-only reset.
+			const preservedReset = reset[0] === SGR_RESET ? SGR_RESET : "";
+			afterMarker = cursorCell + preservedReset + afterReset;
+		} else {
+			afterMarker = afterReverseOn;
+		}
+	}
+
+	return beforeMarker + afterMarker;
+}
+
 export { visibleWidth };
 
 /**
@@ -1157,8 +1193,10 @@ export abstract class TuiBase extends Container implements TUI {
 				const beforeMarker = line.slice(0, markerIndex);
 				const col = visibleWidth(beforeMarker);
 
-				// Strip marker from the line
-				lines[row] = line.slice(0, markerIndex) + line.slice(markerIndex + CURSOR_MARKER.length);
+				// Strip marker from the line. When the hardware cursor is shown for
+				// IME support, also strip the marker-adjacent reverse-video software
+				// cursor so only the terminal cursor remains visible.
+				lines[row] = stripCursorMarker(line, this.getShowHardwareCursor());
 
 				return { row, col };
 			}
