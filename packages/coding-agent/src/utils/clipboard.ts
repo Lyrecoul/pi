@@ -1,5 +1,6 @@
 import { type ExecFileSyncOptionsWithStringEncoding, execFileSync, execSync, spawn } from "child_process";
 import { platform } from "os";
+import { t } from "../i18n/index.ts";
 import { isWaylandSession } from "./clipboard-image.ts";
 import { clipboard } from "./clipboard-native.ts";
 
@@ -170,6 +171,6 @@ export async function copyToClipboard(text: string): Promise<void> {
 	}
 
 	if (!copied) {
-		throw new Error("Failed to copy to clipboard");
+		throw new Error(t("Failed to copy to clipboard"));
 	}
 }

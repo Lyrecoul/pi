@@ -4,6 +4,7 @@ import {
 	type ProjectTrustOption,
 	type ProjectTrustStoreEntry,
 } from "../../../core/trust-manager.ts";
+import { t } from "../../../i18n/index.ts";
 import { theme } from "../theme/theme.ts";
 import { DynamicBorder } from "./dynamic-border.ts";
 import { keyHint, rawKeyHint } from "./keybinding-hints.ts";
@@ -20,13 +21,13 @@ export interface TrustSelectorOptions {
 
 function formatDecision(trustPath: string | undefined, decision: ProjectTrustStoreEntry | null): string {
 	if (decision === null) {
-		return "none";
+		return t("none");
 	}
-	const label = decision.decision ? "trusted" : "untrusted";
+	const label = decision.decision ? t("trusted") : t("untrusted");
 	if (trustPath !== undefined && decision.path !== trustPath) {
-		return `${label} (inherited from ${decision.path})`;
+		return t("{label} (inherited from {path})", { label, path: decision.path });
 	}
-	return `${label} (${decision.path})`;
+	return t("{label} ({path})", { label, path: decision.path });
 }
 
 export class TrustSelectorComponent extends Container {
@@ -51,21 +52,30 @@ export class TrustSelectorComponent extends Container {
 
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
-		this.addChild(new Text(theme.fg("accent", theme.bold("Project trust")), 1, 0));
+		this.addChild(new Text(theme.fg("accent", theme.bold(t("Project trust"))), 1, 0));
 		this.addChild(new Text(theme.fg("muted", options.cwd), 1, 0));
 		this.addChild(new Spacer(1));
 		this.addChild(
 			new Text(
 				theme.fg(
 					"muted",
-					`Saved decision: ${formatDecision(this.trustOptions[0]?.savedPath, options.savedDecision)}`,
+					t("Saved decision: {decision}", {
+						decision: formatDecision(this.trustOptions[0]?.savedPath, options.savedDecision),
+					}),
 				),
 				1,
 				0,
 			),
 		);
 		this.addChild(
-			new Text(theme.fg("muted", `Current session: ${options.projectTrusted ? "trusted" : "untrusted"}`), 1, 0),
+			new Text(
+				theme.fg(
+					"muted",
+					t("Current session: {state}", { state: options.projectTrusted ? t("trusted") : t("untrusted") }),
+				),
+				1,
+				0,
+			),
 		);
 		this.addChild(new Spacer(1));
 
@@ -74,11 +84,11 @@ export class TrustSelectorComponent extends Container {
 		this.addChild(new Spacer(1));
 		this.addChild(
 			new Text(
-				rawKeyHint("↑↓", "navigate") +
+				rawKeyHint("↑↓", t("navigate")) +
 					"  " +
-					keyHint("tui.select.confirm", "save") +
+					keyHint("tui.select.confirm", t("save")) +
 					"  " +
-					keyHint("tui.select.cancel", "cancel"),
+					keyHint("tui.select.cancel", t("cancel")),
 				1,
 				0,
 			),

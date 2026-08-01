@@ -1,39 +1,39 @@
-# Environment Variables
+# 环境变量
 
-Pi uses environment variables in three ways:
+Pi 以三种方式使用环境变量：
 
-- Variables such as `PI_OFFLINE` configure the Pi process.
-- Pi sets `PI_CODING_AGENT` so child processes can detect that they run inside Pi.
-- Commands run by the LLM-callable bash tool receive `PI_*` variables describing the current session.
+- 诸如 `PI_OFFLINE` 之类的变量用于配置 Pi 进程。
+- Pi 设置 `PI_CODING_AGENT`，以便子进程可以检测到自己运行在 Pi 内部。
+- 由可调用 LLM 的 bash 工具运行的命令会收到描述当前会话的 `PI_*` 变量。
 
-Provider API-key variables are documented separately in [Providers](providers.md#environment-variables-or-auth-file).
+提供商 API 密钥变量在[提供商](providers.md#environment-variables-or-auth-file)中单独说明。
 
-## Process Marker
+## 进程标记
 
-The CLI and RPC entry points set `PI_CODING_AGENT=true`. Child processes inherit it and can use it to detect that they run inside Pi. It is not session-specific and is not set automatically when Pi is embedded through the SDK.
+CLI 和 RPC 入口点设置 `PI_CODING_AGENT=true`。子进程会继承它，并可用它来检测自己运行在 Pi 内部。它不是会话特定的，并且当 Pi 通过 SDK 嵌入时不会自动设置。
 
-## Bash Tool Session Environment
+## Bash 工具的会话环境
 
-Commands run by the bash tool receive the current Pi session state:
+由 bash 工具运行的命令会收到当前的 Pi 会话状态：
 
-| Variable | Description |
+| 变量 | 描述 |
 |----------|-------------|
-| `PI_SESSION_ID` | Current session ID |
-| `PI_SESSION_FILE` | Absolute path to the current session JSONL file; unset for ephemeral sessions |
-| `PI_PROVIDER` | Currently selected model provider |
-| `PI_MODEL` | Currently selected model ID |
-| `PI_REASONING_LEVEL` | Current effective reasoning level: `off`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max` |
+| `PI_SESSION_ID` | 当前会话 ID |
+| `PI_SESSION_FILE` | 当前会话 JSONL 文件的绝对路径；临时会话不设置 |
+| `PI_PROVIDER` | 当前选择的模型提供商 |
+| `PI_MODEL` | 当前选择的模型 ID |
+| `PI_REASONING_LEVEL` | 当前生效的推理级别：`off`、`minimal`、`low`、`medium`、`high`、`xhigh` 或 `max` |
 
-The values are resolved when each command starts. Switching models or changing the reasoning level therefore affects the next bash command without restarting Pi. `PI_PROVIDER` and `PI_MODEL` identify the selected Pi model, not a different upstream model that a router may choose internally.
+这些值在每条命令启动时解析。因此切换模型或更改推理级别会影响下一条 bash 命令，而无需重启 Pi。`PI_PROVIDER` 和 `PI_MODEL` 标识所选用的 Pi 模型，而非路由器可能内部选择的不同的上游模型。
 
-When asked which model or provider is running, inspect these variables instead of inferring the answer from the system prompt:
+当被问到正在运行哪个模型或提供商时，请检查这些变量，而不是从系统提示词中推断答案：
 
 ```bash
 printf '%s/%s\n' "$PI_PROVIDER" "$PI_MODEL"
 printf 'reasoning=%s session=%s\n' "$PI_REASONING_LEVEL" "$PI_SESSION_ID"
 ```
 
-The session file can be inspected directly when the session is persistent:
+当会话是持久的时，可以直接检查会话文件：
 
 ```bash
 if [ -n "$PI_SESSION_FILE" ]; then
@@ -41,11 +41,11 @@ if [ -n "$PI_SESSION_FILE" ]; then
 fi
 ```
 
-These variables are injected into the LLM-callable bash tool. They are not injected into user-entered `!` or `!!` commands.
+这些变量被注入到可调用 LLM 的 bash 工具中。它们不会被注入到用户输入的 `!` 或 `!!` 命令中。
 
-### Custom Bash Tools
+### 自定义 bash 工具
 
-Bash tools created with `createBashTool()` expose the session environment by default when registered with Pi. Injection happens before `spawnHook`, so a hook receives the variables in `ctx.env`:
+使用 `createBashTool()` 创建的 bash 工具在注册到 Pi 时默认暴露会话环境。注入发生在 `spawnHook` 之前，因此钩子可以在 `ctx.env` 中收到这些变量：
 
 ```typescript
 const bashTool = createBashTool(cwd, {
@@ -56,7 +56,7 @@ const bashTool = createBashTool(cwd, {
 });
 ```
 
-Disable session metadata independently of the spawn hook:
+独立于 spawn hook 禁用会话元数据：
 
 ```typescript
 const bashTool = createBashTool(cwd, {
@@ -65,24 +65,25 @@ const bashTool = createBashTool(cwd, {
 });
 ```
 
-When disabled, Pi removes inherited values for these variables so nested Pi processes do not expose stale parent-session metadata.
+禁用后，Pi 会移除这些变量的继承值，这样嵌套的 Pi 进程就不会暴露过期的父会话元数据。
 
-## Pi Process Configuration
+## Pi 进程配置
 
-These variables are read by Pi itself:
+以下变量由 Pi 自身读取：
 
-| Variable | Description |
+| 变量 | 描述 |
 |----------|-------------|
-| `PI_CODING_AGENT_DIR` | Override the config directory; default is `~/.pi/agent` |
-| `PI_CODING_AGENT_SESSION_DIR` | Override session storage; overridden by `--session-dir` |
-| `PI_PACKAGE_DIR` | Override the package directory, useful for Nix/Guix store paths |
-| `PI_OFFLINE` | Disable startup network operations, including update checks, package updates, and install/update telemetry |
-| `PI_SKIP_VERSION_CHECK` | Disable the `pi.dev` latest-version request |
-| `PI_TELEMETRY` | Override install/update telemetry and provider attribution headers: `1`/`true`/`yes` or `0`/`false`/`no` |
-| `PI_CACHE_RETENTION` | Set to `long` for extended provider prompt caching where supported |
-| `PI_SHARE_VIEWER_URL` | Override the base URL used by `/share` |
-| `PI_HARDWARE_CURSOR` | Set to `1` to show the hardware cursor; see [Terminal setup](terminal-setup.md) |
-| `VISUAL`, `EDITOR` | External editor fallback when `externalEditor` is unset |
-| `HTTP_PROXY`, `HTTPS_PROXY` | Proxy outbound HTTP requests |
+| `PI_CODING_AGENT_DIR` | 覆盖配置目录；默认为 `~/.pi/agent` |
+| `PI_CODING_AGENT_SESSION_DIR` | 覆盖会话存储；被 `--session-dir` 覆盖 |
+| `PI_PACKAGE_DIR` | 覆盖包目录，对 Nix/Guix 存储路径很有用 |
+| `PI_OFFLINE` | 禁用启动时的网络操作，包括更新检查、包更新以及安装/更新遥测 |
+| `PI_SKIP_VERSION_CHECK` | 禁用 `pi.dev` 的最新版本请求 |
+| `PI_TELEMETRY` | 覆盖安装/更新遥测和提供商归因头：`1`/`true`/`yes` 或 `0`/`false`/`no` |
+| `PI_CACHE_RETENTION` | 设为 `long` 以在支持的地方启用扩展的提供商提示缓存 |
+| `LC_ALL`, `LC_MESSAGES`, `LANG` | 当 `language` 设置为 `"auto"` 时选择 UI 语言：按 `LC_ALL`、`LC_MESSAGES`、`LANG` 的顺序检测，`zh*` 选择简体中文，`en*` 选择英语，其他值回退到英语 |
+| `PI_SHARE_VIEWER_URL` | 覆盖 `/share` 使用的基础 URL |
+| `PI_HARDWARE_CURSOR` | 设为 `1` 以显示硬件光标；参见[终端配置](terminal-setup.md) |
+| `VISUAL`, `EDITOR` | 当 `externalEditor` 未设置时作为外部编辑器回退 |
+| `HTTP_PROXY`, `HTTPS_PROXY` | 为出站 HTTP 请求设置代理 |
 
-Provider credentials such as `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and cloud-provider configuration are listed in [Providers](providers.md#environment-variables-or-auth-file).
+提供商凭据，如 `ANTHROPIC_API_KEY`、`OPENAI_API_KEY` 和云提供商配置，列于[提供商](providers.md#environment-variables-or-auth-file)中。

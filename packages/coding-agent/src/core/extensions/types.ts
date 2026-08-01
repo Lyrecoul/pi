@@ -133,13 +133,21 @@ export interface ExtensionUIContext {
 	select(title: string, options: string[], opts?: ExtensionUIDialogOptions): Promise<string | undefined>;
 
 	/** Show a confirmation dialog. */
-	confirm(title: string, message: string, opts?: ExtensionUIDialogOptions): Promise<boolean>;
+	confirm(
+		title: string,
+		message: string,
+		opts?: ExtensionUIDialogOptions & { params?: Readonly<Record<string, string | number>> },
+	): Promise<boolean>;
 
 	/** Show a text input dialog. */
 	input(title: string, placeholder?: string, opts?: ExtensionUIDialogOptions): Promise<string | undefined>;
 
 	/** Show a notification to the user. */
-	notify(message: string, type?: "info" | "warning" | "error"): void;
+	notify(
+		message: string,
+		type?: "info" | "warning" | "error",
+		params?: Readonly<Record<string, string | number>>,
+	): void;
 
 	/** Listen to raw terminal input (interactive mode only). Returns an unsubscribe function. */
 	onTerminalInput(handler: TerminalInputHandler): () => void;

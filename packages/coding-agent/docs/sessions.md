@@ -1,78 +1,78 @@
-# Sessions
+# 会话
 
-Pi saves conversations as sessions so you can continue work, branch from earlier turns, and revisit previous paths.
+Pi 将对话保存为会话，以便你可以继续工作、从更早的轮次分支，并重新访问之前的路径。
 
-## Session Storage
+## 会话存储
 
-Sessions auto-save to `~/.pi/agent/sessions/`, organized by working directory. Each session is a JSONL file with a tree structure.
+会话自动保存到 `~/.pi/agent/sessions/`，按工作目录组织。每个会话是一个 JSONL 文件，具有树结构。
 
 ```bash
-pi -c                  # Continue most recent session
-pi -r                  # Browse and select from past sessions
-pi --no-session        # Ephemeral mode; do not save
-pi --name "my task"    # Set session display name at startup
-pi --session <path|id> # Use a specific session file or partial session ID
-pi --fork <path|id>    # Fork a session file or partial session ID into a new session
+pi -c                  # 继续最近的会话
+pi -r                  # 浏览并从过去的会话中选择
+pi --no-session        # 临时模式；不保存
+pi --name "my task"    # 启动时设置会话显示名称
+pi --session <path|id> # 使用特定的会话文件或部分会话 ID
+pi --fork <path|id>    # 将会话文件或部分会话 ID 分叉到新会话
 ```
 
-Use `/session` in interactive mode to see the current session file, session ID, message count, tokens, and cost.
+在交互模式中使用 `/session` 查看当前会话文件、会话 ID、消息数、token 和成本。
 
-For the JSONL file format and SessionManager API, see [Session Format](session-format.md).
+有关 JSONL 文件格式和 SessionManager API，请参阅[会话格式](session-format.md)。
 
-## Session Commands
+## 会话命令
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/resume` | Browse and select previous sessions |
-| `/new` | Start a new session |
-| `/name <name>` | Set the current session display name |
-| `/session` | Show session info |
-| `/tree` | Navigate the current session tree |
-| `/fork` | Create a new session from a previous user message |
-| `/clone` | Duplicate the current active branch into a new session |
-| `/compact [prompt]` | Summarize older context; see [Compaction](compaction.md) |
-| `/export [file]` | Export session to HTML |
-| `/share` | Upload as private GitHub gist with shareable HTML link |
+| `/resume` | 浏览并选择之前的会话 |
+| `/new` | 开始新会话 |
+| `/name <name>` | 设置当前会话的显示名称 |
+| `/session` | 显示会话信息 |
+| `/tree` | 导航当前会话树 |
+| `/fork` | 从之前的用户消息创建新会话 |
+| `/clone` | 将当前活动分支复制到新会话 |
+| `/compact [prompt]` | 汇总较早的上下文；参阅[压缩](compaction.md) |
+| `/export [file]` | 将会话导出为 HTML |
+| `/share` | 上传为私有 GitHub gist，带可分享的 HTML 链接 |
 
-## Resuming and Deleting Sessions
+## 恢复和删除会话
 
-`/resume` opens an interactive session picker for the current project. `pi -r` opens the same picker at startup.
+`/resume` 为当前项目打开交互式会话选择器。`pi -r` 在启动时打开相同的选择器。
 
-In the picker you can:
+在选择器中，你可以：
 
-- search by typing
-- toggle path display with Ctrl+P
-- toggle sort mode with Ctrl+S
-- filter to named sessions with Ctrl+N
-- rename with Ctrl+R
-- delete with Ctrl+D, then confirm
+- 通过输入搜索
+- 使用 Ctrl+P 切换路径显示
+- 使用 Ctrl+S 切换排序模式
+- 使用 Ctrl+N 过滤到命名会话
+- 使用 Ctrl+R 重命名
+- 使用 Ctrl+D 删除，然后确认
 
-When available, pi uses the `trash` CLI for deletion instead of permanently removing files.
+在可用时，pi 使用 `trash` CLI 进行删除，而不是永久移除文件。
 
-## Naming Sessions
+## 命名会话
 
-Use `/name <name>` to set a human-readable session name:
+使用 `/name <name>` 设置人类可读的会话名称：
 
 ```text
 /name Refactor auth module
 ```
 
-Set the name at startup with `--name` or `-n`:
+使用 `--name` 或 `-n` 在启动时设置名称：
 
 ```bash
 pi --name "Refactor auth module"
 pi --name "CI audit" -p "Review this build failure"
 ```
 
-Named sessions are easier to find in `/resume` and `pi -r`.
+命名会话在 `/resume` 和 `pi -r` 中更容易找到。
 
-## Branching with `/tree`
+## 使用 `/tree` 分支
 
-Sessions are stored as trees. Every entry has an `id` and `parentId`, and the current position is the active leaf. `/tree` lets you jump to any previous point and continue from there without creating a new file.
+会话存储为树。每个条目都有一个 `id` 和 `parentId`，当前位置是活动叶子。`/tree` 允许你跳转到任何之前的点并从那里继续，而无需创建新文件。
 
 <p align="center"><img src="images/tree-view.png" alt="Tree View" width="600"></p>
 
-Example shape:
+示例形状：
 
 ```text
 ├─ user: "Hello, can you help..."
@@ -84,62 +84,62 @@ Example shape:
 │        └─ assistant: "For approach B..."
 ```
 
-### Tree Controls
+### 树控件
 
-| Key | Action |
+| 按键 | 动作 |
 |-----|--------|
-| ↑/↓ | Navigate visible entries |
-| ←/→ | Page up/down |
-| Ctrl+←/Ctrl+→ or Alt+←/Alt+→ | Fold/unfold or jump between branch segments |
-| Shift+L | Set or clear a label on the selected entry |
-| Shift+T | Toggle label timestamps |
-| Enter | Select entry |
-| Escape/Ctrl+C | Cancel |
-| Ctrl+O | Cycle filter mode |
+| ↑/↓ | 在可见条目间导航 |
+| ←/→ | 向上/向下翻页 |
+| Ctrl+←/Ctrl+→ 或 Alt+←/Alt+→ | 折叠/展开或跳转到分支段之间 |
+| Shift+L | 在选中条目上设置或清除标签 |
+| Shift+T | 切换标签时间戳 |
+| Enter | 选择条目 |
+| Escape/Ctrl+C | 取消 |
+| Ctrl+O | 循环过滤模式 |
 
-Filter modes are: default, no-tools, user-only, labeled-only, and all. Configure the default with `treeFilterMode` in [Settings](settings.md).
+过滤模式有：default、no-tools、user-only、labeled-only 和 all。在[设置](settings.md)中使用 `treeFilterMode` 配置默认值。
 
-### Selection Behavior
+### 选择行为
 
-Selecting a user or custom message:
+选择用户或自定义消息：
 
-1. Moves the leaf to the selected message's parent.
-2. Places the selected message text in the editor.
-3. Lets you edit and resubmit, creating a new branch.
+1. 将叶子移动到所选消息的父节点。
+2. 将所选消息的文本放入编辑器。
+3. 允许你编辑并重新提交，创建新分支。
 
-Selecting an assistant, tool, compaction, or other non-user entry:
+选择助手、工具、压缩或其他非用户条目：
 
-1. Moves the leaf to that entry.
-2. Leaves the editor empty.
-3. Lets you continue from that point.
+1. 将叶子移动到该条目。
+2. 保持编辑器为空。
+3. 允许你从该点继续。
 
-Selecting the root user message resets the leaf to an empty conversation and places the original prompt in the editor.
+选择根用户消息会将叶子重置为空对话，并将原始提示词放入编辑器。
 
-## `/tree`, `/fork`, and `/clone`
+## `/tree`、`/fork` 和 `/clone`
 
-| Feature | `/tree` | `/fork` | `/clone` |
+| 功能 | `/tree` | `/fork` | `/clone` |
 |---------|---------|---------|----------|
-| Output | Same session file | New session file | New session file |
-| View | Full tree | User-message selector | Current active branch |
-| Typical use | Explore alternatives in place | Start a new session from an earlier prompt | Duplicate current work before continuing |
-| Summary | Optional branch summary | None | None |
+| 输出 | 同一会话文件 | 新会话文件 | 新会话文件 |
+| 视图 | 完整树 | 用户消息选择器 | 当前活动分支 |
+| 典型用途 | 原地探索备选方案 | 从较早的提示词开始新会话 | 在继续前复制当前工作 |
+| 摘要 | 可选分支摘要 | 无 | 无 |
 
-Use `/tree` when you want to keep alternatives together. Use `/fork` or `/clone` when you want a separate session file.
+当你想将备选方案保留在一起时使用 `/tree`。当你想使用单独的会话文件时使用 `/fork` 或 `/clone`。
 
-## Branch Summaries
+## 分支摘要
 
-When `/tree` switches away from one branch to another, pi can summarize the abandoned branch and attach that summary at the new position. This preserves important context from the path you left without replaying the whole branch.
+当 `/tree` 从一个分支切换到另一个分支时，pi 可以汇总被放弃的分支，并在新位置附加该摘要。这保留了从你离开的路径中重要的上下文，而无需重放整个分支。
 
-When prompted, choose one of:
+提示时，选择以下之一：
 
-1. no summary
-2. summarize with the default prompt
-3. summarize with custom focus instructions
+1. 不总结
+2. 使用默认提示词总结
+3. 使用自定义关注指令总结
 
-See [Compaction](compaction.md) for branch summarization internals and extension hooks.
+有关分支摘要的内部机制和扩展钩子，请参阅[压缩](compaction.md)。
 
-## Session Format
+## 会话格式
 
-Session files are JSONL and contain message entries, model changes, thinking-level changes, labels, compactions, branch summaries, and extension entries.
+会话文件是 JSONL，包含消息条目、模型更改、思维级别更改、标签、压缩、分支摘要和扩展条目。
 
-For parsers, extensions, SDK usage, and the full SessionManager API, see [Session Format](session-format.md).
+对于解析器、扩展、SDK 用法和完整的 SessionManager API，请参阅[会话格式](session-format.md)。

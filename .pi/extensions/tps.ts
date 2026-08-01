@@ -41,7 +41,18 @@ export default function (pi: ExtensionAPI) {
 
 		const elapsedSeconds = elapsedMs / 1000;
 		const tokensPerSecond = output / elapsedSeconds;
-		const message = `TPS ${tokensPerSecond.toFixed(1)} tok/s. out ${output.toLocaleString()}, in ${input.toLocaleString()}, cache r/w ${cacheRead.toLocaleString()}/${cacheWrite.toLocaleString()}, total ${totalTokens.toLocaleString()}, ${elapsedSeconds.toFixed(1)}s`;
-		ctx.ui.notify(message, "info");
+		ctx.ui.notify(
+			"TPS {tps} tok/s. out {out}, in {input}, cache r/w {cacheRead}/{cacheWrite}, total {total}, {elapsed}s",
+			"info",
+			{
+				tps: tokensPerSecond.toFixed(1),
+				out: output.toLocaleString(),
+				input: input.toLocaleString(),
+				cacheRead: cacheRead.toLocaleString(),
+				cacheWrite: cacheWrite.toLocaleString(),
+				total: totalTokens.toLocaleString(),
+				elapsed: elapsedSeconds.toFixed(1),
+			},
+		);
 	});
 }

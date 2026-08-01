@@ -1,3 +1,5 @@
+import { t } from "../../i18n/index.ts";
+
 export type LlamaModelStatus = "unloaded" | "loading" | "loaded" | "downloading" | "sleeping";
 
 export interface LlamaModelInfo {
@@ -100,7 +102,7 @@ function parseLoadProgress(data: unknown): LlamaProgress | undefined {
 		if (index >= 0) ratio = (index + (stageRatio ?? 0)) / stages.length;
 	}
 	return {
-		message: stage ? `Loading ${stage.replaceAll("_", " ")}` : "Loading model",
+		message: stage ? t("Loading {stage}", { stage: stage.replaceAll("_", " ") }) : t("Loading model"),
 		ratio,
 	};
 }
@@ -120,7 +122,7 @@ function parseDownloadProgress(data: unknown): LlamaProgress | undefined {
 	}
 	if (total <= 0) return undefined;
 	return {
-		message: "Downloading model",
+		message: t("Downloading model"),
 		ratio: done / total,
 		detail: `${formatBytes(done)} / ${formatBytes(total)}`,
 	};

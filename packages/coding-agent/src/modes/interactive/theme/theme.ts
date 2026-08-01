@@ -14,6 +14,7 @@ import { type Static, Type } from "typebox";
 import { Compile } from "typebox/compile";
 import { getCustomThemesDir, getThemesDir } from "../../../config.ts";
 import type { SourceInfo } from "../../../core/source-info.ts";
+import { t } from "../../../i18n/index.ts";
 import { closeWatcher, watchWithErrorHandler } from "../../../utils/fs-watch.ts";
 import { highlight, supportsLanguage } from "../../../utils/syntax-highlight.ts";
 
@@ -553,18 +554,18 @@ function parseThemeJson(label: string, json: unknown): ThemeJson {
 			otherErrors.push(`  - ${path}: ${error.message}`);
 		}
 
-		let errorMessage = `Invalid theme "${label}":\n`;
+		let errorMessage = t('Invalid theme "{label}":\n', { label });
 		if (missingColors.size > 0) {
-			errorMessage += "\nMissing required color tokens:\n";
+			errorMessage += t("\nMissing required color tokens:\n");
 			errorMessage += Array.from(missingColors)
 				.sort()
 				.map((color) => `  - ${color}`)
 				.join("\n");
-			errorMessage += '\n\nPlease add these colors to your theme\'s "colors" object.';
-			errorMessage += "\nSee the built-in themes (dark.json, light.json) for reference values.";
+			errorMessage += t('\n\nPlease add these colors to your theme\'s "colors" object.');
+			errorMessage += t("\nSee the built-in themes (dark.json, light.json) for reference values.");
 		}
 		if (otherErrors.length > 0) {
-			errorMessage += `\n\nOther errors:\n${otherErrors.join("\n")}`;
+			errorMessage += t("\n\nOther errors:\n") + otherErrors.join("\n");
 		}
 
 		throw new Error(errorMessage);

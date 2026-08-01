@@ -6,6 +6,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME, getAgentDir } from "../config.ts";
+import type { LanguageSetting } from "../i18n/index.ts";
 import { normalizePath, resolvePath } from "../utils/paths.ts";
 import { DEFAULT_HTTP_IDLE_TIMEOUT_MS, parseHttpIdleTimeoutMs } from "./http-dispatcher.ts";
 
@@ -92,6 +93,7 @@ export interface Settings {
 	steeringMode?: "all" | "one-at-a-time";
 	followUpMode?: "all" | "one-at-a-time";
 	theme?: string;
+	language?: LanguageSetting; // default: "auto" - UI language: "auto" (detect from environment) | "en" | "zh-CN"
 	compaction?: CompactionSettings;
 	branchSummary?: BranchSummarySettings;
 	retry?: RetrySettings;
@@ -729,6 +731,22 @@ export class SettingsManager {
 		const value = this.settings.theme;
 		if (typeof value === "string") return value;
 		return undefined;
+	}
+
+	/**
+	 * UI language preference. Returns "auto" when unset or set to an unknown
+	 * value; "auto" resolves from the environment at startup.
+	 */
+	getLanguageSetting(): LanguageSetting {
+		const value = this.settings.language;
+		if (value === "en" || value === "zh-CN") return value;
+		return "auto";
+	}
+
+	setLanguageSetting(language: LanguageSetting): void {
+		this.globalSettings.language = language;
+		this.markModified("language");
+		this.save();
 	}
 
 	getTheme(): string | undefined {

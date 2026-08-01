@@ -1,4 +1,5 @@
 import { CONFIG_DIR_NAME } from "../config.ts";
+import { t } from "../i18n/index.ts";
 import { emitProjectTrustEvent } from "./extensions/runner.ts";
 import type { LoadExtensionsResult, ProjectTrustContext } from "./extensions/types.ts";
 import type { DefaultProjectTrust } from "./settings-manager.ts";
@@ -22,7 +23,13 @@ export interface ResolveProjectTrustedOptions {
 }
 
 function formatProjectTrustPrompt(cwd: string): string {
-	return `Trust project folder?\n${cwd}\n\nThis allows pi to load ${CONFIG_DIR_NAME} settings and resources, install missing project packages, and execute project extensions.`;
+	return t(
+		"Trust project folder?\n{cwd}\n\nThis allows pi to load {configDir} settings and resources, install missing project packages, and execute project extensions.",
+		{
+			cwd,
+			configDir: CONFIG_DIR_NAME,
+		},
+	);
 }
 
 async function selectProjectTrustOption(

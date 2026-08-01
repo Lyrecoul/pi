@@ -2,6 +2,7 @@ import type { AgentState } from "@earendil-works/pi-agent-core";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { basename, join } from "path";
 import { APP_NAME, getExportTemplateDir } from "../../config.ts";
+import { t } from "../../i18n/index.ts";
 import { getResolvedThemeColors, getThemeExportColors } from "../../modes/interactive/theme/theme.ts";
 import { normalizePath, resolvePath } from "../../utils/paths.ts";
 import type { ToolDefinition } from "../extensions/types.ts";
@@ -242,10 +243,10 @@ export async function exportSessionToHtml(
 
 	const sessionFile = sm.getSessionFile();
 	if (!sessionFile) {
-		throw new Error("Cannot export in-memory session to HTML");
+		throw new Error(t("Cannot export in-memory session to HTML"));
 	}
 	if (!existsSync(sessionFile)) {
-		throw new Error("Nothing to export yet - start a conversation first");
+		throw new Error(t("Nothing to export yet - start a conversation first"));
 	}
 
 	const entries = sm.getEntries();
@@ -290,7 +291,7 @@ export async function exportFromFile(inputPath: string, options?: ExportOptions 
 	const resolvedInputPath = resolvePath(inputPath);
 
 	if (!existsSync(resolvedInputPath)) {
-		throw new Error(`File not found: ${resolvedInputPath}`);
+		throw new Error(t("File not found: {path}", { path: resolvedInputPath }));
 	}
 
 	const sm = SessionManager.open(resolvedInputPath);

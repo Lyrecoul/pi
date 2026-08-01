@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME } from "../config.ts";
+import { t } from "../i18n/index.ts";
 import { canonicalizePath, resolvePath } from "../utils/paths.ts";
 
 export type ProjectTrustDecision = boolean | null;
@@ -65,12 +66,12 @@ export function getProjectTrustParentPath(cwd: string): string | undefined {
 export function getProjectTrustOptions(cwd: string, options?: { includeSessionOnly?: boolean }): ProjectTrustOption[] {
 	const trustPath = normalizeCwd(cwd);
 	const trustOptions: ProjectTrustOption[] = [
-		{ label: "Trust", trusted: true, updates: [{ path: trustPath, decision: true }], savedPath: trustPath },
+		{ label: t("Trust"), trusted: true, updates: [{ path: trustPath, decision: true }], savedPath: trustPath },
 	];
 	const parentPath = getProjectTrustParentPath(cwd);
 	if (parentPath !== undefined) {
 		trustOptions.push({
-			label: `Trust parent folder (${parentPath})`,
+			label: t("Trust parent folder ({path})", { path: parentPath }),
 			trusted: true,
 			updates: [
 				{ path: parentPath, decision: true },
@@ -80,16 +81,16 @@ export function getProjectTrustOptions(cwd: string, options?: { includeSessionOn
 		});
 	}
 	if (options?.includeSessionOnly) {
-		trustOptions.push({ label: "Trust (this session only)", trusted: true, updates: [] });
+		trustOptions.push({ label: t("Trust (this session only)"), trusted: true, updates: [] });
 	}
 	trustOptions.push({
-		label: "Do not trust",
+		label: t("Do not trust"),
 		trusted: false,
 		updates: [{ path: trustPath, decision: false }],
 		savedPath: trustPath,
 	});
 	if (options?.includeSessionOnly) {
-		trustOptions.push({ label: "Do not trust (this session only)", trusted: false, updates: [] });
+		trustOptions.push({ label: t("Do not trust (this session only)"), trusted: false, updates: [] });
 	}
 	return trustOptions;
 }

@@ -18,7 +18,7 @@ export default function (pi: ExtensionAPI) {
 				done(undefined);
 				return new Text("", 0, 0);
 			});
-			ctx.ui.notify(`TUI full redraws: ${redraws}`, "info");
+			ctx.ui.notify("TUI full redraws: {n}", "info", { n: redraws });
 		},
 	});
 }

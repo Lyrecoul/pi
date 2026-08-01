@@ -1,5 +1,6 @@
 import { fuzzyMatch } from "@earendil-works/pi-tui";
 import type { SessionInfo } from "../../../core/session-manager.ts";
+import { t } from "../../../i18n/index.ts";
 
 export type SortMode = "threaded" | "recent" | "relevance";
 
@@ -46,7 +47,7 @@ export function parseSearchQuery(query: string): ParsedSearchQuery {
 	if (trimmed.startsWith("re:")) {
 		const pattern = trimmed.slice(3).trim();
 		if (!pattern) {
-			return { mode: "regex", tokens: [], regex: null, error: "Empty regex" };
+			return { mode: "regex", tokens: [], regex: null, error: t("Empty regex") };
 		}
 		try {
 			return { mode: "regex", tokens: [], regex: new RegExp(pattern, "i") };

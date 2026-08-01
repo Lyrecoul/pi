@@ -8,6 +8,7 @@ import type {
 	RefreshModelsContext,
 } from "@earendil-works/pi-ai";
 import { stream, streamSimple } from "@earendil-works/pi-ai/compat";
+import { t } from "../../i18n/index.ts";
 import { LlamaClient, type LlamaModelInfo, llamaInferenceUrl, normalizeLlamaServerUrl } from "./client.ts";
 
 export const LLAMA_PROVIDER_ID = "llama.cpp";
@@ -72,7 +73,7 @@ export function createLlamaProvider(): LlamaProviderController {
 				login: async (interaction): Promise<ApiKeyCredential> => {
 					const enteredUrl = await interaction.prompt({
 						type: "text",
-						message: "llama.cpp server URL",
+						message: t("llama.cpp server URL"),
 						placeholder: process.env.LLAMA_BASE_URL ?? DEFAULT_LLAMA_SERVER_URL,
 					});
 					const serverUrl = normalizeLlamaServerUrl(
@@ -81,7 +82,7 @@ export function createLlamaProvider(): LlamaProviderController {
 					const apiKey = (
 						await interaction.prompt({
 							type: "secret",
-							message: "API key (optional)",
+							message: t("API key (optional)"),
 						})
 					).trim();
 					await new LlamaClient(serverUrl, apiKey || undefined).list({ signal: interaction.signal });

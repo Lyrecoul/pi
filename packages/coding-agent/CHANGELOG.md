@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added a built-in Simplified Chinese (zh-CN) localization for the interactive UI and CLI help. The locale is selected automatically from `LC_ALL`/`LC_MESSAGES`/`LANG` or explicitly via the new `language` setting (`"auto"` | `"en"` | `"zh-CN"`). See [Settings](docs/settings.md#ui-%E4%B8%8E%E6%98%BE%E7%A4%BA).
 - Added chainable `pi.registerMarkdownTransformer()` hooks for display-only transformation of user and assistant Markdown.
 - Added an experimental fullscreen UI mode, selectable through `--ui-mode fullscreen` or `/settings` ([#7304](https://github.com/earendil-works/pi/issues/7304)).
 - Added a sticky editor, status, widget, and footer dock to fullscreen mode while keeping the transcript independently scrollable.

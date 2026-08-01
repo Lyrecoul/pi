@@ -2,6 +2,7 @@ import { accessSync, constants, existsSync, readFileSync, realpathSync } from "f
 import { homedir } from "os";
 import { basename, dirname, join, resolve, sep, win32 } from "path";
 import { fileURLToPath } from "url";
+import { t } from "./i18n/index.ts";
 import { spawnProcessSync } from "./utils/child-process.ts";
 import { normalizePath } from "./utils/paths.ts";
 
@@ -333,16 +334,29 @@ export function getSelfUpdateUnavailableInstruction(
 	const method = detectInstallMethod();
 	const target = normalizeSelfUpdatePackageTarget(updatePackageTarget);
 	if (method === "bun-binary") {
-		return `Download from: https://github.com/earendil-works/pi-mono/releases/latest`;
+		return t("Download from: https://github.com/earendil-works/pi-mono/releases/latest");
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, target, npmCommand);
 	if (command) {
 		if (isManagedByGlobalPackageManager(method, packageName, npmCommand) && !isSelfUpdatePathWritable()) {
-			return `This installation is managed by a global ${method} install, but the install path is not writable. Update it yourself with: ${command.display}`;
+			return t(
+				"This installation is managed by a global {method} install, but the install path is not writable. Update it yourself with: {command}",
+				{
+					method,
+					command: command.display,
+				},
+			);
 		}
-		return `This installation is not managed by a global ${method} install. Update it with the package manager, wrapper, or source checkout that provides it.`;
+		return t(
+			"This installation is not managed by a global {method} install. Update it with the package manager, wrapper, or source checkout that provides it.",
+			{
+				method,
+			},
+		);
 	}
-	return `Update ${target.installSpec} using the package manager, wrapper, or source checkout that provides this installation.`;
+	return t("Update {spec} using the package manager, wrapper, or source checkout that provides this installation.", {
+		spec: target.installSpec,
+	});
 }
 
 export function getUpdateInstruction(packageName: string): string {

@@ -23,6 +23,7 @@ import { type AppMode, resolveProjectTrusted } from "./core/project-trust.ts";
 import { DefaultResourceLoader } from "./core/resource-loader.ts";
 import { SettingsManager } from "./core/settings-manager.ts";
 import { hasTrustRequiringProjectResources, ProjectTrustStore } from "./core/trust-manager.ts";
+import { t } from "./i18n/index.ts";
 import { spawnProcess } from "./utils/child-process.ts";
 import { getLatestPiRelease, isNewerPackageVersion } from "./utils/version-check.ts";
 import {
@@ -69,7 +70,11 @@ interface PackageCommandOptions {
 function reportSettingsErrors(settingsManager: SettingsManager, context: string): void {
 	const errors = settingsManager.drainErrors();
 	for (const { scope, error } of errors) {
-		console.error(chalk.yellow(`Warning (${context}, ${scope} settings): ${error.message}`));
+		console.error(
+			chalk.yellow(
+				t("Warning ({context}, {scope} settings): {message}", { context, scope, message: error.message }),
+			),
+		);
 		if (error.stack) {
 			console.error(chalk.dim(error.stack));
 		}
@@ -92,34 +97,34 @@ function getPackageCommandUsage(command: PackageCommand): string {
 const CONFIG_COMMAND_USAGE = `${APP_NAME} config [-l] [--approve|--no-approve]`;
 
 function printConfigCommandHelp(): void {
-	console.log(`${chalk.bold("Usage:")}
+	console.log(`${chalk.bold(t("Usage:"))}
   ${CONFIG_COMMAND_USAGE}
 
-Open the resource configuration TUI to enable or disable package resources.
-Without -l, starts in global settings (~/${CONFIG_DIR_NAME}/agent/settings.json).
-Press Tab in the TUI to switch between global and project-local modes.
+${t("Open the resource configuration TUI to enable or disable package resources.")}
+${t("Without -l, starts in global settings (~/{configDir}/agent/settings.json).", { configDir: CONFIG_DIR_NAME })}
+${t("Press Tab in the TUI to switch between global and project-local modes.")}
 
-Options:
-  -l, --local       Edit project overrides (${CONFIG_DIR_NAME}/settings.json)
-  -a, --approve     Trust project-local files for this command with -l
-  -na, --no-approve Ignore project-local files for this command with -l
+${chalk.bold(t("Options:"))}
+  -l, --local       ${t("Edit project overrides ({configDir}/settings.json)", { configDir: CONFIG_DIR_NAME })}
+  -a, --approve     ${t("Trust project-local files for this command with -l")}
+  -na, --no-approve ${t("Ignore project-local files for this command with -l")}
 `);
 }
 
 function printPackageCommandHelp(command: PackageCommand): void {
 	switch (command) {
 		case "install":
-			console.log(`${chalk.bold("Usage:")}
+			console.log(`${chalk.bold(t("Usage:"))}
   ${getPackageCommandUsage("install")}
 
-Install a package and add it to settings.
+${t("Install a package and add it to settings.")}
 
-Options:
-  -l, --local       Install project-locally (${CONFIG_DIR_NAME}/settings.json)
-  -a, --approve     Trust project-local files for this command
-  -na, --no-approve Ignore project-local files for this command
+${chalk.bold(t("Options:"))}
+  -l, --local       ${t("Install project-locally ({configDir}/settings.json)", { configDir: CONFIG_DIR_NAME })}
+  -a, --approve     ${t("Trust project-local files for this command")}
+  -na, --no-approve ${t("Ignore project-local files for this command")}
 
-Examples:
+${chalk.bold(t("Examples:"))}
   ${APP_NAME} install npm:@foo/bar
   ${APP_NAME} install git:github.com/user/repo
   ${APP_NAME} install git:git@github.com:user/repo
@@ -130,57 +135,57 @@ Examples:
 			return;
 
 		case "remove":
-			console.log(`${chalk.bold("Usage:")}
+			console.log(`${chalk.bold(t("Usage:"))}
   ${getPackageCommandUsage("remove")}
 
-Remove a package and its source from settings.
-Alias: ${APP_NAME} uninstall <source> [-l]
+${t("Remove a package and its source from settings.")}
+${t("Alias: {cmd} uninstall <source> [-l]", { cmd: APP_NAME })}
 
-Options:
-  -l, --local       Remove from project settings (${CONFIG_DIR_NAME}/settings.json)
-  -a, --approve     Trust project-local files for this command
-  -na, --no-approve Ignore project-local files for this command
+${chalk.bold(t("Options:"))}
+  -l, --local       ${t("Remove from project settings ({configDir}/settings.json)", { configDir: CONFIG_DIR_NAME })}
+  -a, --approve     ${t("Trust project-local files for this command")}
+  -na, --no-approve ${t("Ignore project-local files for this command")}
 
-Examples:
+${chalk.bold(t("Examples:"))}
   ${APP_NAME} remove npm:@foo/bar
   ${APP_NAME} uninstall npm:@foo/bar
 `);
 			return;
 
 		case "update":
-			console.log(`${chalk.bold("Usage:")}
+			console.log(`${chalk.bold(t("Usage:"))}
   ${getPackageCommandUsage("update")}
 
-Update pi, installed packages, or model catalogs.
+${t("Update pi, installed packages, or model catalogs.")}
 
-Options:
-  --self                  Update pi only (default when no target is given)
-  --extensions            Update installed packages only
-  --models                Refresh model catalogs only
-  --all                   Update pi and installed packages
-  --extension <source>    Update one package only
-  -a, --approve           Trust project-local files for this command
-  -na, --no-approve       Ignore project-local files for this command
-  --force                 Reinstall pi even if the current version is latest
+${chalk.bold(t("Options:"))}
+  --self                  ${t("Update pi only (default when no target is given)")}
+  --extensions            ${t("Update installed packages only")}
+  --models                ${t("Refresh model catalogs only")}
+  --all                   ${t("Update pi and installed packages")}
+  --extension <source>    ${t("Update one package only")}
+  -a, --approve           ${t("Trust project-local files for this command")}
+  -na, --no-approve       ${t("Ignore project-local files for this command")}
+  --force                 ${t("Reinstall pi even if the current version is latest")}
 
-Short forms:
-  ${APP_NAME} update                Update pi only
-  ${APP_NAME} update --all          Update pi and all extensions
-  ${APP_NAME} update --models       Refresh model catalogs only
-  ${APP_NAME} update <source>       Update one package
-  ${APP_NAME} update pi             Update pi only (self works as alias to pi)
+${chalk.bold(t("Short forms:"))}
+  ${APP_NAME} update                ${t("Update pi only")}
+  ${APP_NAME} update --all          ${t("Update pi and all extensions")}
+  ${APP_NAME} update --models       ${t("Refresh model catalogs only")}
+  ${APP_NAME} update <source>       ${t("Update one package")}
+  ${APP_NAME} update pi             ${t("Update pi only (self works as alias to pi)")}
 `);
 			return;
 
 		case "list":
-			console.log(`${chalk.bold("Usage:")}
+			console.log(`${chalk.bold(t("Usage:"))}
   ${getPackageCommandUsage("list")}
 
-List installed packages from user and project settings.
+${t("List installed packages from user and project settings.")}
 
-Options:
-  -a, --approve      Trust project-local files for this command
-  -na, --no-approve  Ignore project-local files for this command
+${chalk.bold(t("Options:"))}
+  -a, --approve      ${t("Trust project-local files for this command")}
+  -na, --no-approve  ${t("Ignore project-local files for this command")}
 `);
 			return;
 	}
@@ -409,39 +414,43 @@ async function refreshModelCatalogs(agentDir: string): Promise<void> {
 			signal: controller.signal,
 		});
 		if (result.aborted) {
-			throw new Error("Model catalog refresh timed out.");
+			throw new Error(t("Model catalog refresh timed out."));
 		}
 		if (result.errors.size > 0) {
 			const details = Array.from(result.errors, ([provider, error]) => `${provider}: ${error.message}`).join("; ");
-			throw new Error(`Could not refresh model catalogs: ${details}`);
+			throw new Error(t("Could not refresh model catalogs: {details}", { details }));
 		}
 	} finally {
 		clearTimeout(timeout);
 	}
-	console.log(chalk.green("Model catalogs refreshed"));
+	console.log(chalk.green(t("Model catalogs refreshed")));
 }
 
 function printSelfUpdateUnavailable(
 	npmCommand?: string[],
 	updatePackageTarget: SelfUpdatePackageTarget = PACKAGE_NAME,
 ): void {
-	console.error(`error: ${APP_NAME} cannot self-update this installation.`);
+	console.error(`error: ${t("{app} cannot self-update this installation.", { app: APP_NAME })}`);
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand, updatePackageTarget));
 
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`Location of pi executable: ${entrypoint}`);
+		console.error(t("Location of pi executable: {path}", { path: entrypoint }));
 	}
 }
 
 function printSelfUpdateFallback(command: SelfUpdateCommand): void {
-	console.error(chalk.dim(`If this keeps failing, run this command yourself: ${command.display}`));
+	console.error(
+		chalk.dim(t("If this keeps failing, run this command yourself: {command}", { command: command.display })),
+	);
 }
 
 function printPnpmSelfUpdateMetadataHint(): void {
-	console.error(chalk.yellow("If pnpm reports missing package versions, its cached registry metadata may be stale."));
-	console.error(chalk.yellow(`Run \`pnpm store prune\` and retry \`${APP_NAME} update --self\`.`));
+	console.error(
+		chalk.yellow(t("If pnpm reports missing package versions, its cached registry metadata may be stale.")),
+	);
+	console.error(chalk.yellow(t("Run `pnpm store prune` and retry `{app} update --self`.", { app: APP_NAME })));
 }
 
 function printSelfUpdateNote(note: string): void {
@@ -451,7 +460,7 @@ function printSelfUpdateNote(note: string): void {
 	}
 
 	console.log();
-	console.log(chalk.bold(chalk.yellow("Update note")));
+	console.log(chalk.bold(chalk.yellow(t("Update note"))));
 	try {
 		const width = Math.max(20, process.stdout.columns ?? 80);
 		const renderedLines = new Markdown(trimmedNote, 0, 0, SELF_UPDATE_NOTE_MARKDOWN_THEME)
@@ -496,12 +505,12 @@ async function getSelfUpdatePlan(force: boolean): Promise<SelfUpdatePlan> {
 		};
 	}
 
-	console.log(chalk.green(`${APP_NAME} is already up to date (v${VERSION})`));
+	console.log(chalk.green(t("{app} is already up to date (v{version})", { app: APP_NAME, version: VERSION })));
 	return { packageName, installSpec, version: latestRelease.version, shouldRun: false };
 }
 
 async function runSelfUpdate(command: SelfUpdateCommand): Promise<void> {
-	console.log(chalk.dim(`Updating ${APP_NAME} with ${command.display}...`));
+	console.log(chalk.dim(t("Updating {app} with {command}...", { app: APP_NAME, command: command.display })));
 	for (const step of command.steps ?? [command]) {
 		await new Promise<void>((resolve, reject) => {
 			const child = spawnProcess(step.command, step.args, {
@@ -548,7 +557,7 @@ function getCommandAppMode(): AppMode {
 
 function reportProjectTrustWarnings(warnings: readonly string[]): void {
 	for (const warning of warnings) {
-		console.error(chalk.yellow(`Warning: ${warning}`));
+		console.error(chalk.yellow(t("Warning: {warning}", { warning })));
 	}
 }
 
@@ -624,13 +633,15 @@ export async function handleConfigCommand(
 		} else if (arg === "-na" || arg === "--no-approve") {
 			projectTrustOverride = false;
 		} else if (arg.startsWith("-")) {
-			console.error(chalk.red(`Unknown option ${arg} for "config".`));
-			console.error(chalk.dim(`Use "${APP_NAME} --help" or "${CONFIG_COMMAND_USAGE}".`));
+			console.error(chalk.red(t('Unknown option {arg} for "config".', { arg })));
+			console.error(
+				chalk.dim(t('Use "{app} --help" or "{usage}".', { app: APP_NAME, usage: CONFIG_COMMAND_USAGE })),
+			);
 			process.exitCode = 1;
 			return true;
 		} else {
-			console.error(chalk.red(`Unexpected argument ${arg}.`));
-			console.error(chalk.dim(`Usage: ${CONFIG_COMMAND_USAGE}`));
+			console.error(chalk.red(t("Unexpected argument {arg}.", { arg })));
+			console.error(chalk.dim(t("Usage: {usage}", { usage: CONFIG_COMMAND_USAGE })));
 			process.exitCode = 1;
 			return true;
 		}
@@ -646,7 +657,7 @@ export async function handleConfigCommand(
 	});
 	reportProjectTrustWarnings(projectTrustWarnings);
 	if (local && !settingsManager.isProjectTrusted()) {
-		console.error(chalk.red("Project is not trusted. Use --approve to modify local resource config."));
+		console.error(chalk.red(t("Project is not trusted. Use --approve to modify local resource config.")));
 		process.exitCode = 1;
 		return true;
 	}
@@ -688,22 +699,30 @@ export async function handlePackageCommand(
 	}
 
 	if (options.invalidOption) {
-		console.error(chalk.red(`Unknown option ${options.invalidOption} for "${options.command}".`));
-		console.error(chalk.dim(`Use "${APP_NAME} --help" or "${getPackageCommandUsage(options.command)}".`));
+		console.error(
+			chalk.red(
+				t('Unknown option {option} for "{command}".', { option: options.invalidOption, command: options.command }),
+			),
+		);
+		console.error(
+			chalk.dim(
+				t('Use "{app} --help" or "{usage}".', { app: APP_NAME, usage: getPackageCommandUsage(options.command) }),
+			),
+		);
 		process.exitCode = 1;
 		return true;
 	}
 
 	if (options.missingOptionValue) {
-		console.error(chalk.red(`Missing value for ${options.missingOptionValue}.`));
-		console.error(chalk.dim(`Usage: ${getPackageCommandUsage(options.command)}`));
+		console.error(chalk.red(t("Missing value for {option}.", { option: options.missingOptionValue })));
+		console.error(chalk.dim(t("Usage: {usage}", { usage: getPackageCommandUsage(options.command) })));
 		process.exitCode = 1;
 		return true;
 	}
 
 	if (options.invalidArgument) {
-		console.error(chalk.red(`Unexpected argument ${options.invalidArgument}.`));
-		console.error(chalk.dim(`Usage: ${getPackageCommandUsage(options.command)}`));
+		console.error(chalk.red(t("Unexpected argument {arg}.", { arg: options.invalidArgument })));
+		console.error(chalk.dim(t("Usage: {usage}", { usage: getPackageCommandUsage(options.command) })));
 		process.exitCode = 1;
 		return true;
 	}
@@ -717,8 +736,8 @@ export async function handlePackageCommand(
 
 	const source = options.source;
 	if ((options.command === "install" || options.command === "remove") && !source) {
-		console.error(chalk.red(`Missing ${options.command} source.`));
-		console.error(chalk.dim(`Usage: ${getPackageCommandUsage(options.command)}`));
+		console.error(chalk.red(t("Missing {command} source.", { command: options.command })));
+		console.error(chalk.dim(t("Usage: {usage}", { usage: getPackageCommandUsage(options.command) })));
 		process.exitCode = 1;
 		return true;
 	}
@@ -727,8 +746,8 @@ export async function handlePackageCommand(
 		try {
 			await refreshModelCatalogs(getAgentDir());
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "Unknown model catalog refresh error";
-			console.error(chalk.red(`Error: ${message}`));
+			const message = error instanceof Error ? error.message : t("Unknown model catalog refresh error");
+			console.error(chalk.red(t("Error: {message}", { message })));
 			process.exitCode = 1;
 		}
 		return true;
@@ -864,8 +883,8 @@ export async function handlePackageCommand(
 						}
 						await runSelfUpdate(selfUpdateCommand);
 					} catch (error: unknown) {
-						const message = error instanceof Error ? error.message : "Unknown package command error";
-						console.error(chalk.red(`Error: ${message}`));
+						const message = error instanceof Error ? error.message : t("Unknown package command error");
+						console.error(chalk.red(t("Error: {message}", { message })));
 						if (installMethod === "pnpm") {
 							printPnpmSelfUpdateMetadataHint();
 						}
@@ -873,14 +892,22 @@ export async function handlePackageCommand(
 						process.exitCode = 1;
 						return true;
 					}
-					console.log(chalk.green(`Updated ${APP_NAME} from ${VERSION} to ${selfUpdatePlan.version}`));
+					console.log(
+						chalk.green(
+							t("Updated {app} from {old} to {new}", {
+								app: APP_NAME,
+								old: VERSION,
+								new: selfUpdatePlan.version,
+							}),
+						),
+					);
 				}
 				return true;
 			}
 		}
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Unknown package command error";
-		console.error(chalk.red(`Error: ${message}`));
+		const message = error instanceof Error ? error.message : t("Unknown package command error");
+		console.error(chalk.red(t("Error: {message}", { message })));
 		process.exitCode = 1;
 		return true;
 	}

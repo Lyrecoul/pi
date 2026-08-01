@@ -295,7 +295,7 @@ export default function (pi: ExtensionAPI) {
 				const sessionDir = ctx.sessionManager.getSessionDir();
 				const parsedRef = parseRef(ref, targetCwd);
 
-				ctx.ui.notify(`Importing repro session from ${ref}...`, "info");
+				ctx.ui.notify("Importing repro session from {ref}...", "info", { ref });
 
 				let sourceName: string;
 				let decoded: { header: SessionHeader; jsonl: string };
@@ -319,7 +319,8 @@ export default function (pi: ExtensionAPI) {
 				if (existsSync(destination)) {
 					const overwrite = await ctx.ui.confirm(
 						"Session already imported",
-						`Overwrite ${destination}? Local changes to that session will be lost.`,
+						"Overwrite {path}? Local changes to that session will be lost.",
+						{ params: { path: destination } },
 					);
 					if (!overwrite) {
 						ctx.ui.notify("Import cancelled", "warning");
@@ -328,7 +329,11 @@ export default function (pi: ExtensionAPI) {
 				}
 				writeFileSync(destination, rewritten);
 
-				ctx.ui.notify(`Imported session ${decoded.header.id} (cwd ${decoded.header.cwd} -> ${targetCwd})`, "info");
+				ctx.ui.notify("Imported session {id} (cwd {source} -> {target})", "info", {
+					id: decoded.header.id,
+					source: decoded.header.cwd,
+					target: targetCwd,
+				});
 				await ctx.switchSession(destination, {
 					withSession: async (nextCtx) => {
 						if (!platformNotice) return;
@@ -344,7 +349,7 @@ export default function (pi: ExtensionAPI) {
 					},
 				});
 			} catch (error) {
-				ctx.ui.notify(`ir: ${error instanceof Error ? error.message : String(error)}`, "error");
+				ctx.ui.notify("ir: {error}", "error", { error: error instanceof Error ? error.message : String(error) });
 			}
 		},
 	});

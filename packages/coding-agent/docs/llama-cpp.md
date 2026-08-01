@@ -1,12 +1,12 @@
 # llama.cpp
 
-Pi supports the [llama.cpp](https://github.com/ggml-org/llama.cpp) router server. The router discovers multiple GGUF models and loads or unloads them on demand.
+Pi 支持 [llama.cpp](https://github.com/ggml-org/llama.cpp) 路由器服务器。路由器会发现在多个 GGUF 模型并按需加载/卸载它们。
 
-Use a current llama.cpp build with router support. Follow the [build instructions](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md) or install a [prebuilt release](https://github.com/ggml-org/llama.cpp/releases) for your platform.
+请使用带路由器支持的当前 llama.cpp 构建。按照[构建说明](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md)操作，或为你的平台安装[预构建发布版](https://github.com/ggml-org/llama.cpp/releases)。
 
-## Start the router
+## 启动路由器
 
-Start `llama-server` without `--model` or `-m`. Passing a model starts single-model mode instead of router mode.
+在不带 `--model` 或 `-m` 的情况下启动 `llama-server`。传入模型会启动单模型模式而不是路由器模式。
 
 ```bash
 llama-server \
@@ -19,15 +19,15 @@ llama-server \
   -c 32768
 ```
 
-Important options:
+重要选项：
 
-- `--models-dir ~/models` discovers local GGUF files.
-- `--no-models-autoload` keeps loading explicit through `/llama`.
-- `--jinja` enables compatible chat templates and tool calling.
-- `-ngl 999` offloads as many layers as possible to the GPU.
-- `-c 32768` sets the context window for each loaded model. Omit it to use the model's native context, which may require substantially more memory.
+- `--models-dir ~/models` 发现本地 GGUF 文件。
+- `--no-models-autoload` 保持通过 `/llama` 显式加载。
+- `--jinja` 启用兼容的聊天模板和工具调用。
+- `-ngl 999` 尽可能多地将层卸载到 GPU。
+- `-c 32768` 设置每个已加载模型的上下文窗口。省略它以使用模型的原生上下文，这可能要占用多得多的内存。
 
-A single-file model can sit directly in the model directory. Put multimodal and multi-shard models in separate subdirectories:
+单文件模型可以直接放在模型目录中。将多模态和多分片模型放在单独的子目录中：
 
 ```text
 ~/models/
@@ -41,19 +41,19 @@ A single-file model can sit directly in the model directory. Put multimodal and 
     └── large-model-Q4_K_M-00003-of-00003.gguf
 ```
 
-Restart the router after manually adding files. For per-model context sizes and other options, use [llama.cpp model presets](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md#model-presets).
+手动添加文件后重启路由器。有关每个模型的上下文大小和其他选项，请使用 [llama.cpp 模型预设](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md#model-presets)。
 
-## Configure Pi
+## 配置 Pi
 
-Start Pi and configure the provider:
+启动 Pi 并配置提供商：
 
 ```text
 /login llama.cpp
 ```
 
-Enter the router URL and optional API key. The default URL is `http://127.0.0.1:8080`.
+输入路由器 URL 和可选的 API 密钥。默认 URL 是 `http://127.0.0.1:8080`。
 
-Environment variables can configure the same values without `/login`:
+环境变量可以配置相同的值而无需 `/login`：
 
 ```bash
 export LLAMA_BASE_URL=http://127.0.0.1:8080
@@ -61,39 +61,39 @@ export LLAMA_API_KEY=optional-secret
 pi
 ```
 
-If the server uses an API key, start `llama-server` with the matching `--api-key` value. Keep `--host 127.0.0.1` for local-only access.
+如果服务器使用 API 密钥，请用匹配的 `--api-key` 值启动 `llama-server`。保持 `--host 127.0.0.1` 以进行仅本地的访问。
 
-## Manage models
+## 管理模型
 
-Run:
+运行：
 
 ```text
 /llama
 ```
 
-- Select an unloaded model to load it.
-- Select a loaded model to unload it.
-- Select **Download model…**, search Hugging Face, then choose a repository and quantization. Exact `owner/repository[:quant]` values also work.
-- Press Escape during a load or download to confirm cancellation.
+- 选择未加载的模型以加载它。
+- 选择已加载的模型以卸载它。
+- 选择**下载模型…**，搜索 Hugging Face，然后选择仓库和量化。精确的 `owner/repository[:quant]` 值也可以。
+- 在加载或下载期间按 Escape 确认取消。
 
-Hugging Face search uses `HF_TOKEN` when set, then checks `$HF_TOKEN_PATH`, `$HF_HOME/token`, `$XDG_CACHE_HOME/huggingface/token`, and `~/.cache/huggingface/token`. Search also works without authentication, subject to lower rate limits. Pi warns before downloading gated repositories and links to their access page. The llama.cpp server performs the download, so its process must also have `HF_TOKEN` when the selected repository requires access.
+Hugging Face 搜索在设置时使用 `HF_TOKEN`，然后依次检查 `$HF_TOKEN_PATH`、`$HF_HOME/token`、`$XDG_CACHE_HOME/huggingface/token` 和 `~/.cache/huggingface/token`。搜索无需认证也可以工作，但速率限制更低。Pi 在下载受门控的仓库之前会发出警告并链接到其访问页面。下载由 llama.cpp 服务器执行，因此当所选仓库需要访问权限时，其进程也必须具有 `HF_TOKEN`。
 
-If other models are loaded, Pi asks whether to unload them first or keep them loaded. Pi does not silently unload models and never deletes model files. The router may be shared with other clients, so `/llama` always displays the router's current state.
+如果已加载其他模型，Pi 会询问是否先卸载它们或保持加载。Pi 不会静默卸载模型，也永远不会删除模型文件。路由器可能与其他客户端共享，因此 `/llama` 始终显示路由器的当前状态。
 
-Only loaded models appear in `/model`. After loading a model, run `/model` to select it for the current Pi session.
+只有已加载的模型会出现在 `/model` 中。加载模型后，运行 `/model` 为当前 Pi 会话选择它。
 
-If the router disconnects, `/llama` shows **Retry** and **Close**. Retry reconnects and refreshes model state without replaying the interrupted operation.
+如果路由器断开连接，`/llama` 会显示**重试**和**关闭**。重试会重新连接并刷新模型状态，而不会重放被中断的操作。
 
-## Troubleshooting
+## 故障排除
 
-Check that the router is reachable:
+检查路由器是否可达：
 
 ```bash
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/models
 ```
 
-- **No models in `/llama`:** Check `--models-dir`, the directory layout, and restart the router.
-- **Model missing from `/model`:** Load it with `/llama` first.
-- **Load fails or uses too much memory:** Lower `-c` or unload another model.
-- **Server is not in router mode:** Start it without `--model`, `-m`, or `-hf`.
+- **`/llama` 中没有模型：** 检查 `--models-dir`、目录布局，并重启路由器。
+- **`/model` 中缺少模型：** 先用 `/llama` 加载它。
+- **加载失败或占用太多内存：** 降低 `-c` 或卸载另一个模型。
+- **服务器不在路由器模式：** 在不带 `--model`、`-m` 或 `-hf` 的情况下启动它。

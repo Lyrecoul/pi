@@ -1,13 +1,13 @@
-# Termux (Android) Setup
+# Termux（Android）安装
 
-Pi runs on Android via [Termux](https://termux.dev/), a terminal emulator and Linux environment for Android.
+Pi 通过 [Termux](https://termux.dev/) 在 Android 上运行，Termux 是适用于 Android 的终端模拟器和 Linux 环境。
 
-## Prerequisites
+## 前置条件
 
-1. Install [Termux](https://github.com/termux/termux-app#installation) from GitHub or F-Droid (not Google Play, that version is deprecated)
-2. Install [Termux:API](https://github.com/termux/termux-api#installation) from GitHub or F-Droid for clipboard and other device integrations
+1. 从 GitHub 或 F-Droid 安装 [Termux](https://github.com/termux/termux-app#installation)（不要用 Google Play，那个版本已弃用）
+2. 从 GitHub 或 F-Droid 安装 [Termux:API](https://github.com/termux/termux-api#installation) 以获得剪贴板和其他设备集成
 
-## Installation
+## 安装
 
 ```bash
 # Update packages
@@ -26,15 +26,15 @@ mkdir -p ~/.pi/agent
 pi
 ```
 
-## Clipboard Support
+## 剪贴板支持
 
-Clipboard operations use `termux-clipboard-set` and `termux-clipboard-get` when running in Termux. The Termux:API app must be installed for these to work.
+在 Termux 中运行时，剪贴板操作使用 `termux-clipboard-set` 和 `termux-clipboard-get`。必须安装 Termux:API 应用这些才能工作。
 
-Image clipboard is not supported on Termux (the `ctrl+v` image paste feature will not work).
+Termux 不支持图片剪贴板（`ctrl+v` 图片粘贴功能将无法工作）。
 
-## Example AGENTS.md for Termux
+## 面向 Termux 的示例 AGENTS.md
 
-Create `~/.pi/agent/AGENTS.md` to help the agent understand the Termux environment:
+创建 `~/.pi/agent/AGENTS.md` 以帮助 agent 理解 Termux 环境：
 
 ````markdown
 # Agent Environment: Termux on Android
@@ -93,35 +93,35 @@ termux-camera-photo out.jpg   # Take photo
 - Storage permission needed for `/storage/emulated/0` access
 ````
 
-## Limitations
+## 限制
 
-- **No image clipboard**: Termux clipboard API only supports text
-- **No native binaries**: Some optional native dependencies (like the clipboard module) are unavailable on Android ARM64 and are skipped during installation
-- **Storage access**: To access files in `/storage/emulated/0` (Downloads, etc.), run `termux-setup-storage` once to grant permissions
+- **无图片剪贴板**：Termux 剪贴板 API 只支持文本
+- **无原生二进制**：一些可选的原生依赖（如剪贴板模块）在 Android ARM64 上不可用，安装时会被跳过
+- **存储访问**：要访问 `/storage/emulated/0`（Downloads 等）中的文件，请运行一次 `termux-setup-storage` 以授予权限
 
-## Troubleshooting
+## 故障排除
 
-### Clipboard not working
+### 剪贴板不工作
 
-Ensure both apps are installed:
-1. Termux (from GitHub or F-Droid)
-2. Termux:API (from GitHub or F-Droid)
+确保两个应用都已安装：
+1. Termux（来自 GitHub 或 F-Droid）
+2. Termux:API（来自 GitHub 或 F-Droid）
 
-Then install the CLI tools:
+然后安装 CLI 工具：
 ```bash
 pkg install termux-api
 ```
 
-### Permission denied for shared storage
+### 共享存储权限被拒绝
 
-Run once to grant storage permissions:
+运行一次以授予存储权限：
 ```bash
 termux-setup-storage
 ```
 
-### Node.js installation issues
+### Node.js 安装问题
 
-If npm fails, try clearing the cache:
+如果 npm 失败，请尝试清除缓存：
 ```bash
 npm cache clean --force
 ```

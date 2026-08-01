@@ -1,6 +1,7 @@
 import type { Api, CredentialInfo, Model } from "@earendil-works/pi-ai";
 import { resolveCliModel } from "../core/model-resolver.ts";
 import type { ModelRuntime } from "../core/model-runtime.ts";
+import { t } from "../i18n/index.ts";
 import type { Args } from "./args.ts";
 
 export type CredentialPrintKind = "api_key" | "bearer_token";
@@ -22,11 +23,11 @@ export function isCredentialPrintHelp(args: string[]): boolean {
 }
 
 export function printCredentialPrintHelp(): void {
-	console.log(`Usage:
+	console.log(`${t("Usage:")}
   pi auth print-api-key --model <model> [--provider <provider>]
   pi auth print-bearer-token --model <model> [--provider <provider>] [--min-expiry <duration>]
 
-Prints the configured credential alone on stdout. Provider inference uses configured credentials; specify --provider to select explicitly. Bearer tokens have a 30-minute minimum expiry by default. --min-expiry accepts ms, s, m, or h (for example, 30m).`);
+${t("Prints the configured credential alone on stdout. Provider inference uses configured credentials; specify --provider to select explicitly. Bearer tokens have a 30-minute minimum expiry by default. --min-expiry accepts ms, s, m, or h (for example, 30m).")}`);
 }
 
 /** Parse the small, extensible `pi auth` command surface before normal startup. */
@@ -36,7 +37,9 @@ export function parseCredentialPrintCommand(args: string[]): CredentialPrintComm
 	const kind = args[1] === "print-api-key" ? "api_key" : args[1] === "print-bearer-token" ? "bearer_token" : undefined;
 	if (!kind) {
 		throw new CredentialPrintError(
-			`Unknown auth command "${args[1] ?? ""}". Use "pi auth print-api-key" or "pi auth print-bearer-token".`,
+			t('Unknown auth command "{cmd}". Use "pi auth print-api-key" or "pi auth print-bearer-token".', {
+				cmd: args[1] ?? "",
+			}),
 		);
 	}
 
@@ -48,12 +51,12 @@ export function parseCredentialPrintCommand(args: string[]): CredentialPrintComm
 			continue;
 		}
 		if (kind !== "bearer_token") {
-			throw new CredentialPrintError("--min-expiry is only supported by print-bearer-token");
+			throw new CredentialPrintError(t("--min-expiry is only supported by print-bearer-token"));
 		}
 		const value = args[++index];
 		const match = value ? /^(\d+)(ms|s|m|h)$/iu.exec(value) : undefined;
 		if (!match) {
-			throw new CredentialPrintError("--min-expiry must use a duration such as 30m or 1h");
+			throw new CredentialPrintError(t("--min-expiry must use a duration such as 30m or 1h"));
 		}
 		const amount = Number(match[1]);
 		const unit = match[2];
@@ -65,13 +68,13 @@ export function parseCredentialPrintCommand(args: string[]): CredentialPrintComm
 
 export function validateCredentialPrintArgs(args: Args): void {
 	if (!args.model?.trim()) {
-		throw new CredentialPrintError("Credential printing requires --model <model>");
+		throw new CredentialPrintError(t("Credential printing requires --model <model>"));
 	}
 	if (args.apiKey !== undefined) {
-		throw new CredentialPrintError("Credential printing reads configured credentials; --api-key is not supported");
+		throw new CredentialPrintError(t("Credential printing reads configured credentials; --api-key is not supported"));
 	}
 	if (args.messages.length > 0 || args.fileArgs.length > 0 || args.unknownFlags.size > 0) {
-		throw new CredentialPrintError("Credential printing only accepts --provider and --model");
+		throw new CredentialPrintError(t("Credential printing only accepts --provider and --model"));
 	}
 }
 
@@ -96,7 +99,7 @@ export async function resolveCredentialForPrint(
 	if (args.provider) {
 		const resolved = resolveCliModel({ cliProvider: args.provider, cliModel: args.model, modelRuntime });
 		if (resolved.error || !resolved.model) {
-			throw new CredentialPrintError(resolved.error ?? "Unable to resolve the requested provider/model");
+			throw new CredentialPrintError(resolved.error ?? t("Unable to resolve the requested provider/model"));
 		}
 		models.push(resolved.model);
 	} else {
@@ -108,7 +111,9 @@ export async function resolveCredentialForPrint(
 			}
 		}
 		if (models.length === 0) {
-			throw new CredentialPrintError(`Model "${args.model}" not found. Use --list-models to see available models.`);
+			throw new CredentialPrintError(
+				t('Model "{model}" not found. Use --list-models to see available models.', { model: args.model ?? "" }),
+			);
 		}
 	}
 
@@ -137,16 +142,23 @@ export async function resolveCredentialForPrint(
 		const providerId = models[0]?.provider;
 		const type = providerId ? credentialTypes.get(providerId) : undefined;
 		if (args.provider && kind === "api_key" && type === "oauth") {
-			throw new CredentialPrintError(`Provider "${providerId}" is configured with OAuth, not an API key`);
+			throw new CredentialPrintError(
+				t('Provider "{provider}" is configured with OAuth, not an API key', { provider: providerId }),
+			);
 		}
 		if (args.provider && kind === "bearer_token" && type !== "oauth") {
-			throw new CredentialPrintError(`Provider "${providerId}" is not configured with an OAuth bearer token`);
+			throw new CredentialPrintError(
+				t('Provider "{provider}" is not configured with an OAuth bearer token', { provider: providerId }),
+			);
 		}
 		throw new CredentialPrintError(
-			`No usable ${kind === "api_key" ? "API key" : "OAuth bearer token"} is configured`,
+			t("No usable {type} is configured", { type: kind === "api_key" ? t("API key") : t("OAuth bearer token") }),
 		);
 	}
 	throw new CredentialPrintError(
-		`Model "${args.model}" has multiple configured providers (${credentials.map(({ providerId }) => providerId).join(", ")}). Specify --provider.`,
+		t('Model "{model}" has multiple configured providers ({providers}). Specify --provider.', {
+			model: args.model ?? "",
+			providers: credentials.map(({ providerId }) => providerId).join(", "),
+		}),
 	);
 }
