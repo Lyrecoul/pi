@@ -14,7 +14,12 @@ import {
 	Text,
 } from "@earendil-works/pi-tui";
 import { formatHttpIdleTimeoutMs, HTTP_IDLE_TIMEOUT_CHOICES } from "../../../core/http-dispatcher.ts";
-import type { DefaultProjectTrust, UiMode, WarningSettings } from "../../../core/settings-manager.ts";
+import type {
+	DefaultProjectTrust,
+	MermaidRenderingMode,
+	TuiMode,
+	WarningSettings,
+} from "../../../core/settings-manager.ts";
 import { t } from "../../../i18n/index.ts";
 import {
 	getSelectListTheme,
@@ -68,6 +73,7 @@ export interface SettingsConfig {
 	terminalTheme: TerminalTheme;
 	availableThemes: string[];
 	hideThinkingBlock: boolean;
+	mermaidRenderingMode: MermaidRenderingMode;
 	showCacheMissNotices: boolean;
 	collapseChangelog: boolean;
 	enableInstallTelemetry: boolean;
@@ -81,7 +87,7 @@ export interface SettingsConfig {
 	defaultProjectTrust: DefaultProjectTrust;
 	clearOnShrink: boolean;
 	showTerminalProgress: boolean;
-	uiMode: UiMode;
+	tuiMode: TuiMode;
 	fullscreenScrollbar: ScrollViewScrollbar;
 	warnings: WarningSettings;
 }
@@ -101,6 +107,7 @@ export interface SettingsCallbacks {
 	onThemeChange: (theme: string) => void;
 	onThemePreview?: (theme: string) => void;
 	onHideThinkingBlockChange: (hidden: boolean) => void;
+	onMermaidRenderingModeChange: (mode: MermaidRenderingMode) => void;
 	onShowCacheMissNoticesChange: (shown: boolean) => void;
 	onCollapseChangelogChange: (collapsed: boolean) => void;
 	onEnableInstallTelemetryChange: (enabled: boolean) => void;
@@ -114,7 +121,7 @@ export interface SettingsCallbacks {
 	onDefaultProjectTrustChange: (defaultProjectTrust: DefaultProjectTrust) => void;
 	onClearOnShrinkChange: (enabled: boolean) => void;
 	onShowTerminalProgressChange: (enabled: boolean) => void;
-	onUiModeChange: (mode: UiMode) => void;
+	onTuiModeChange: (mode: TuiMode) => void;
 	onFullscreenScrollbarChange: (mode: ScrollViewScrollbar) => void;
 	onWarningsChange: (warnings: WarningSettings) => void;
 	onCancel: () => void;
@@ -488,107 +495,109 @@ export class SettingsSelectorComponent extends Container {
 		const items: SettingItem[] = [
 			{
 				id: "autocompact",
-				label: t("Auto-compact"),
-				description: t("Automatically compact context when it gets too large"),
+				label: "Auto-compact",
+				description: "Automatically compact context when it gets too large",
 				currentValue: config.autoCompact ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "steering-mode",
-				label: t("Steering mode"),
-				description: t(
+				label: "Steering mode",
+				description:
 					"Enter while streaming queues steering messages. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
-				),
 				currentValue: config.steeringMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "follow-up-mode",
-				label: t("Follow-up mode"),
-				description: t(
-					"{followUpKey} queues follow-up messages until agent stops. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
-					{ followUpKey },
-				),
+				label: "Follow-up mode",
+				description: `${followUpKey} queues follow-up messages until agent stops. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.`,
 				currentValue: config.followUpMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "transport",
-				label: t("Transport"),
-				description: t("Preferred transport for providers that support multiple transports"),
+				label: "Transport",
+				description: "Preferred transport for providers that support multiple transports",
 				currentValue: config.transport,
 				values: ["sse", "websocket", "websocket-cached", "auto"],
 			},
 			{
 				id: "http-idle-timeout",
-				label: t("HTTP idle timeout"),
-				description: t(
+				label: "HTTP idle timeout",
+				description:
 					"Maximum idle gap while waiting for HTTP headers or body chunks. Disable for local models that pause longer than five minutes.",
-				),
 				currentValue: formatHttpIdleTimeoutMs(config.httpIdleTimeoutMs),
 				values: HTTP_IDLE_TIMEOUT_CHOICES.map((choice) => choice.label),
 			},
 			{
 				id: "hide-thinking",
-				label: t("Hide thinking"),
-				description: t("Hide thinking blocks in assistant responses"),
+				label: "Hide thinking",
+				description: "Hide thinking blocks in assistant responses",
 				currentValue: config.hideThinkingBlock ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
+				id: "mermaid-rendering",
+				label: "Mermaid diagrams",
+				description: "Render Mermaid code blocks as Unicode diagrams",
+				currentValue: config.mermaidRenderingMode,
+				values: ["off", "final", "streaming"],
+			},
+			{
 				id: "cache-miss-notices",
-				label: t("Cache miss notices"),
-				description: t("Show transcript notices for significant prompt-cache misses"),
+				label: "Cache miss notices",
+				description: "Show transcript notices for significant prompt-cache misses",
 				currentValue: config.showCacheMissNotices ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "collapse-changelog",
-				label: t("Collapse changelog"),
-				description: t("Show condensed changelog after updates"),
+				label: "Collapse changelog",
+				description: "Show condensed changelog after updates",
 				currentValue: config.collapseChangelog ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "quiet-startup",
-				label: t("Quiet startup"),
-				description: t("Disable verbose printing at startup"),
+				label: "Quiet startup",
+				description: "Disable verbose printing at startup",
 				currentValue: config.quietStartup ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "install-telemetry",
-				label: t("Install telemetry"),
-				description: t("Send an anonymous version/update ping after changelog-detected updates"),
+				label: "Install telemetry",
+				description: "Send an anonymous version/update ping after changelog-detected updates",
 				currentValue: config.enableInstallTelemetry ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "default-project-trust",
-				label: t("Default project trust"),
-				description: t("Fallback behavior when no extension or saved trust decision decides project trust"),
-				currentValue: t(DEFAULT_PROJECT_TRUST_LABELS[config.defaultProjectTrust]),
-				values: Object.values(DEFAULT_PROJECT_TRUST_LABELS).map((label) => t(label)),
+				label: "Default project trust",
+				description: "Fallback behavior when no extension or saved trust decision decides project trust",
+				currentValue: DEFAULT_PROJECT_TRUST_LABELS[config.defaultProjectTrust],
+				values: Object.values(DEFAULT_PROJECT_TRUST_LABELS),
 			},
 			{
 				id: "double-escape-action",
-				label: t("Double-escape action"),
-				description: t("Action when pressing Escape twice with empty editor"),
+				label: "Double-escape action",
+				description: "Action when pressing Escape twice with empty editor",
 				currentValue: config.doubleEscapeAction,
 				values: ["tree", "fork", "none"],
 			},
 			{
 				id: "tree-filter-mode",
-				label: t("Tree filter mode"),
-				description: t("Default filter when opening /tree"),
+				label: "Tree filter mode",
+				description: "Default filter when opening /tree",
 				currentValue: config.treeFilterMode,
 				values: ["default", "no-tools", "user-only", "labeled-only", "all"],
 			},
 			{
 				id: "warnings",
-				label: t("Warnings"),
-				description: t("Enable or disable individual warnings"),
-				currentValue: t("configure"),
+				label: "Warnings",
+				description: "Enable or disable individual warnings",
+				currentValue: "configure",
 				submenu: (_currentValue, done) =>
 					new WarningSettingsSubmenu(
 						currentWarnings,
@@ -622,23 +631,23 @@ export class SettingsSelectorComponent extends Container {
 					),
 			},
 			{
-				id: "ui-mode",
-				label: t("UI mode"),
-				description: t("Interface layout used after restart; fullscreen mode is experimental"),
-				currentValue: config.uiMode,
+				id: "tui-mode",
+				label: t("TUI mode"),
+				description: t("Interface layout; fullscreen mode is experimental"),
+				currentValue: config.tuiMode,
 				values: ["regular", "fullscreen"],
 			},
 			{
 				id: "fullscreen-scrollbar",
-				label: t("Fullscreen scrollbar"),
-				description: t("Scrollbar behavior in fullscreen mode; has no effect in regular mode"),
+				label: "Fullscreen scrollbar",
+				description: "Scrollbar behavior in fullscreen mode; has no effect in regular mode",
 				currentValue: config.fullscreenScrollbar,
 				values: ["auto", "always", "hidden"],
 			},
 			{
 				id: "theme",
-				label: t("Theme"),
-				description: t("Color theme for the interface"),
+				label: "Theme",
+				description: "Color theme for the interface",
 				currentValue: config.currentTheme,
 				submenu: (currentValue, done) =>
 					new ThemeSubmenu(currentValue, config.terminalTheme, config.availableThemes, callbacks, done),
@@ -799,6 +808,9 @@ export class SettingsSelectorComponent extends Container {
 					case "hide-thinking":
 						callbacks.onHideThinkingBlockChange(newValue === "true");
 						break;
+					case "mermaid-rendering":
+						callbacks.onMermaidRenderingModeChange(newValue as MermaidRenderingMode);
+						break;
 					case "cache-miss-notices":
 						callbacks.onShowCacheMissNoticesChange(newValue === "true");
 						break;
@@ -853,8 +865,8 @@ export class SettingsSelectorComponent extends Container {
 					case "terminal-progress":
 						callbacks.onShowTerminalProgressChange(newValue === "true");
 						break;
-					case "ui-mode":
-						callbacks.onUiModeChange(newValue as UiMode);
+					case "tui-mode":
+						callbacks.onTuiModeChange(newValue as TuiMode);
 						break;
 					case "fullscreen-scrollbar":
 						callbacks.onFullscreenScrollbarChange(newValue as ScrollViewScrollbar);

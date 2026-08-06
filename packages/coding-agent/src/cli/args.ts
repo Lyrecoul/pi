@@ -6,7 +6,7 @@ import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import chalk from "chalk";
 import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, ENV_SESSION_DIR } from "../config.ts";
 import type { ExtensionFlag } from "../core/extensions/types.ts";
-import type { UiMode } from "../core/settings-manager.ts";
+import type { TuiMode } from "../core/settings-manager.ts";
 import { t } from "../i18n/index.ts";
 
 export type Mode = "text" | "json" | "rpc";
@@ -47,7 +47,7 @@ export interface Args {
 	noContextFiles?: boolean;
 	listModels?: string | true;
 	offline?: boolean;
-	uiMode?: UiMode;
+	tuiMode?: TuiMode;
 	verbose?: boolean;
 	projectTrustOverride?: boolean;
 	messages: string[];
@@ -178,22 +178,22 @@ export function parseArgs(args: string[]): Args {
 			} else {
 				result.listModels = true;
 			}
-		} else if (arg === "--ui-mode") {
+		} else if (arg === "--tui-mode") {
 			const mode = args[i + 1];
 			if (mode === "regular" || mode === "fullscreen") {
-				result.uiMode = mode;
+				result.tuiMode = mode;
 				i++;
 			} else if (mode === undefined || mode.startsWith("-")) {
-				result.diagnostics.push({ type: "error", message: "--ui-mode requires regular or fullscreen" });
+				result.diagnostics.push({ type: "error", message: "--tui-mode requires regular or fullscreen" });
 			} else {
 				i++;
 				result.diagnostics.push({
 					type: "error",
-					message: `Invalid UI mode "${mode}". Valid values: regular, fullscreen`,
+					message: `Invalid TUI mode "${mode}". Valid values: regular, fullscreen`,
 				});
 			}
 		} else if (arg === "--alt") {
-			result.uiMode = "fullscreen";
+			result.tuiMode = "fullscreen";
 		} else if (arg === "--verbose") {
 			result.verbose = true;
 		} else if (arg === "--approve" || arg === "-a") {
@@ -291,7 +291,7 @@ ${chalk.bold(t("Options:"))}
   --export <file>                ${t("Export session file to HTML and exit")}
   --list-models [search]         ${t("List available models (with optional fuzzy search)")}
   --verbose                      ${t("Force verbose startup (overrides quietStartup setting)")}
-  --ui-mode <mode>               ${t("UI mode: regular (default) or fullscreen")}
+  --tui-mode <mode>              ${t("TUI mode: regular (default) or fullscreen")}
   --approve, -a                  ${t("Trust project-local files for this run")}
   --no-approve, -na              ${t("Ignore project-local files for this run")}
   --offline                      ${t("Disable startup network operations (same as PI_OFFLINE=1)")}

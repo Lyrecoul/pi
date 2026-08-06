@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { Input } from "../src/components/input.ts";
-import { TuiMainScreen } from "../src/TuiMainScreen.ts";
 import { CURSOR_MARKER, stripCursorMarker, type TUI } from "../src/tui.ts";
+import { TuiMainScreen } from "../src/tui-main-screen.ts";
 import { VirtualTerminal } from "./virtual-terminal.ts";
 
 class LoggingVirtualTerminal extends VirtualTerminal {
