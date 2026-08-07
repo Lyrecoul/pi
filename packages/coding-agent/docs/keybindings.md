@@ -10,7 +10,7 @@
 
 ## 按键格式
 
-`modifier+key`，其中修饰键为 `ctrl`、`shift`、`alt`（可组合），按键为：
+`modifier+key`，其中修饰键为 `ctrl`、`shift`、`alt`、`super`（可组合），按键为：
 
 - **字母：** `a-z`
 - **数字：** `0-9`
@@ -18,7 +18,9 @@
 - **功能键：** `f1`-`f12`
 - **符号：** `` ` ``, `-`, `=`, `[`, `]`, `\`, `;`, `'`, `,`, `.`, `/`, `!`, `@`, `#`, `$`, `%`, `^`, `&`, `*`, `(`, `)`, `_`, `+`, `|`, `~`, `{`, `}`, `:`, `<`, `>`, `?`
 
-修饰键组合：`ctrl+shift+x`、`alt+ctrl+x`、`ctrl+shift+alt+x`、`ctrl+1` 等。
+修饰键组合：`ctrl+shift+x`、`alt+ctrl+x`、`ctrl+shift+alt+x`、`super+k`、`ctrl+super+k`、`ctrl+1` 等。
+
+`super` 绑定要求终端单独报告该修饰键，通常通过 Kitty 键盘协议实现；不支持该协议的终端可能无法使用这些绑定。
 
 ## 所有动作
 
@@ -82,10 +84,23 @@
 
 这些动作在交互模式使用 `--ui-mode fullscreen` 时生效，针对主要转录滚动区域。双指触控板和鼠标滚轮输入滚动指针下的区域，回退为在固定的编辑器/状态/底部栏停靠区上方滚动转录内容。点击 OSC 8 超链接会在默认处理程序中打开。用主鼠标按钮拖动可选择文本并复制到剪贴板；在转录内容的顶部或底部边缘按住会自动滚动到屏幕外内容。
 
+全屏转录绑定优先于编辑器绑定。因此，在全屏模式下默认的未修饰导航键控制转录，`ctrl` 变体继续控制编辑器。在全屏模式外，两种变体均控制编辑器。
+
+| 按键 | 默认模式 | 全屏模式 |
+|-----|----------|----------|
+| `home`、`end` | 编辑器 | 转录 |
+| `ctrl+home`、`ctrl+end` | 编辑器 | 编辑器 |
+| `pageUp`、`pageDown` | 编辑器 | 转录 |
+| `ctrl+pageUp`、`ctrl+pageDown` | 编辑器 | 编辑器 |
+
+此路由可通过普通动作绑定配置。例如，`"tui.altScreen.pageUp": "ctrl+pageUp"` 使 `pageUp` 控制编辑器，`ctrl+pageUp` 在全屏模式中控制转录。绑定 `tui.altScreen.halfPageUp` 和 `tui.altScreen.halfPageDown` 可使用较小的转录滚动步长，同时保留整页绑定。设置 `"tui.altScreen.pageUp": []` 可完全禁用该转录快捷键。用户绑定会替换该动作的默认值。
+
 | 按键绑定 ID | 默认值 | 描述 |
 |--------|---------|-------------|
 | `tui.altScreen.pageUp` | `pageUp` | 将转录向上滚动一页 |
 | `tui.altScreen.pageDown` | `pageDown` | 将转录向下滚动一页 |
+| `tui.altScreen.halfPageUp` | *（无）* | 将转录向上滚动半页 |
+| `tui.altScreen.halfPageDown` | *（无）* | 将转录向下滚动半页 |
 | `tui.altScreen.previousPrompt` | `ctrl+shift+up` | 跳到上一条标记的消息 |
 | `tui.altScreen.nextPrompt` | `ctrl+shift+down` | 跳到下一条标记的消息 |
 | `tui.altScreen.top` | `home` | 滚动到转录开头 |
@@ -96,11 +111,11 @@
 | 按键绑定 ID | 默认值 | 描述 |
 |--------|---------|-------------|
 | `app.interrupt` | `escape` | 取消 / 中止 |
-| `app.clear` | `ctrl+c` | 清空编辑器 |
+| `app.clear` | `ctrl+c` | 清空编辑器（首次）/ 退出（再次） |
 | `app.exit` | `ctrl+d` | 退出（编辑器为空时） |
 | `app.suspend` | `ctrl+z`（Windows 上无） | 挂起到后台 |
 | `app.editor.external` | `ctrl+g` | 在外部编辑器中打开（`externalEditor`、`$VISUAL`、`$EDITOR`、Windows 上的 Notepad 或其他位置的 `nano`） |
-| `app.clipboard.pasteImage` | `ctrl+v`（Windows 上为 `alt+v`） | 从剪贴板粘贴图片 |
+| `app.clipboard.pasteImage` | `ctrl+v`（Windows 上为 `alt+v`） | 从剪贴板粘贴图片或文本 |
 
 ### 会话
 

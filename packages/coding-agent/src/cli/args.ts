@@ -251,7 +251,7 @@ ${chalk.bold(t("Commands:"))}
   ${APP_NAME} update [source|self|pi]   ${t("Update pi, extensions, or model catalogs")}
   ${APP_NAME} list                      ${t("List installed extensions from settings")}
   ${APP_NAME} config [-l]               ${t("Open TUI to enable/disable package resources (Tab switches scope)")}
-  ${APP_NAME} auth <command>            ${t("Print credentials for external clients")}
+  ${APP_NAME} auth <command>            ${t("Print credentials or check provider readiness")}
   ${APP_NAME} <command> --help          ${t("Show help for install/remove/uninstall/update/list/config/auth")}
 
 ${chalk.bold(t("Options:"))}
@@ -302,10 +302,10 @@ ${t("Extensions can register additional flags (e.g., --plan from plan-mode exten
 
 ${chalk.bold(t("Examples:"))}
   # ${t("Print a provider API key for an external client")}
-  ${APP_NAME} auth print-api-key --provider openai --model gpt-5.5
+  ${APP_NAME} auth print-api-key --provider openai
 
   # ${t("Print an OAuth bearer token for an external client (refreshes if expired)")}
-  ${APP_NAME} auth print-bearer-token --provider openai-codex --model gpt-5.5
+  ${APP_NAME} auth print-bearer-token --provider openai-codex
 
   # ${t("Interactive mode")}
   ${APP_NAME}
@@ -378,6 +378,7 @@ ${chalk.bold(t("Environment Variables:"))}
   XAI_API_KEY                      - ${t("xAI Grok API key")}
   FIREWORKS_API_KEY                - ${t("Fireworks API key")}
   TOGETHER_API_KEY                 - ${t("Together AI API key")}
+  BASETEN_API_KEY                  - ${t("Baseten API key")}
   OPENROUTER_API_KEY               - ${t("OpenRouter API key")}
   AI_GATEWAY_API_KEY               - ${t("Vercel AI Gateway API key")}
   ZAI_API_KEY                      - ${t("ZAI Coding Plan API key (Global)")}

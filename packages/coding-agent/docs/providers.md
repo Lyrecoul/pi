@@ -96,7 +96,8 @@ pi
 | Kimi For Coding | `KIMI_API_KEY` | `kimi-coding` |
 | MiniMax | `MINIMAX_API_KEY` | `minimax` |
 | MiniMax (China) | `MINIMAX_CN_API_KEY` | `minimax-cn` |
-| Qwen Token Plan | `QWEN_TOKEN_PLAN_API_KEY` | `qwen-token-plan` |
+| Qwen Token Plan (existing catalog) | `QWEN_TOKEN_PLAN_API_KEY` | `qwen-token-plan` |
+| Qwen Token Plan (Individual) | `QWEN_TOKEN_PLAN_API_KEY` | `qwen-token-plan-individual` |
 | Qwen Token Plan (China) | `QWEN_TOKEN_PLAN_CN_API_KEY` | `qwen-token-plan-cn` |
 | Xiaomi MiMo | `XIAOMI_API_KEY` | `xiaomi` |
 | Xiaomi MiMo Token Plan (China) | `XIAOMI_TOKEN_PLAN_CN_API_KEY` | `xiaomi-token-plan-cn` |
@@ -121,6 +122,7 @@ pi
   "opencode-go": { "type": "api_key", "key": "..." },
   "together": { "type": "api_key", "key": "..." },
   "qwen-token-plan":  { "type": "api_key", "key": "sk-sp-..." },
+  "qwen-token-plan-individual": { "type": "api_key", "key": "sk-sp-..." },
   "qwen-token-plan-cn": { "type": "api_key", "key": "sk-sp-..." },
   "xiaomi": { "type": "api_key", "key": "..." },
   "xiaomi-token-plan-cn":  { "type": "api_key", "key": "..." },
@@ -128,6 +130,8 @@ pi
   "xiaomi-token-plan-sgp": { "type": "api_key", "key": "..." }
 }
 ```
+
+`qwen-token-plan-individual` 与 `qwen-token-plan` 使用相同的国际端点和 `QWEN_TOKEN_PLAN_API_KEY`，但选择器仅显示为 Individual 订阅记录的模型。现有提供商保留其较宽的目录以维持向后兼容性。使用 `auth.json` 时，将凭据存储在所选的提供商名下；环境变量由两个国际提供商共享。
 
 文件以 `0600` 权限创建（仅用户读/写）。身份验证文件凭据优先于环境变量。
 
