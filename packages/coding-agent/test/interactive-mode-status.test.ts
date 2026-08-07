@@ -7,6 +7,7 @@ import { TuiMainScreen } from "../../tui/src/tui-main-screen.ts";
 import { VirtualTerminal } from "../../tui/test/virtual-terminal.ts";
 import type { AutocompleteProviderFactory } from "../src/core/extensions/types.ts";
 import type { SourceInfo } from "../src/core/source-info.ts";
+import { setLocale } from "../src/i18n/index.ts";
 import type { AuthSelectorProvider } from "../src/modes/interactive/components/oauth-selector.ts";
 import { InteractiveMode } from "../src/modes/interactive/interactive-mode.ts";
 import { initTheme } from "../src/modes/interactive/theme/theme.ts";
@@ -115,6 +116,31 @@ describe("InteractiveMode.showStatus", () => {
 		// adds spacer + text
 		expect(fakeThis.chatContainer.children).toHaveLength(5);
 		expect(renderLastLine(fakeThis.chatContainer)).toContain("STATUS_TWO");
+	});
+});
+
+describe("InteractiveMode.showNewVersionNotification", () => {
+	beforeAll(() => {
+		initTheme("dark");
+	});
+
+	test("localizes the update prompt", () => {
+		setLocale("zh-CN");
+		try {
+			const fakeThis = {
+				chatContainer: new Container(),
+				ui: { requestRender: vi.fn() },
+			};
+
+			(InteractiveMode as any).prototype.showNewVersionNotification.call(fakeThis, { version: "0.84.2" });
+
+			const output = renderAll(fakeThis.chatContainer);
+			expect(output).toContain("有可用更新");
+			expect(output).toContain("新版本 0.84.2 可用。运行");
+			expect(output).toContain("更新日志：");
+		} finally {
+			setLocale("en");
+		}
 	});
 });
 
