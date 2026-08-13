@@ -106,7 +106,7 @@ function formatFindResult(
 		const remaining = lines.length - maxLines;
 		text += `\n${displayLines.map((line) => theme.fg("toolOutput", line)).join("\n")}`;
 		if (remaining > 0) {
-			text += `${theme.fg("muted", `\n... (${remaining} more lines,`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
+			text += `${theme.fg("muted", `\n... (${t("{n} more lines,", { n: remaining })})`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
 		}
 	}
 
@@ -114,9 +114,10 @@ function formatFindResult(
 	const truncation = result.details?.truncation;
 	if (resultLimit || truncation?.truncated) {
 		const warnings: string[] = [];
-		if (resultLimit) warnings.push(`${resultLimit} results limit`);
-		if (truncation?.truncated) warnings.push(`${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit`);
-		text += `\n${theme.fg("warning", `[Truncated: ${warnings.join(", ")}]`)}`;
+		if (resultLimit) warnings.push(t("{n} results limit", { n: resultLimit }));
+		if (truncation?.truncated)
+			warnings.push(t("{size} limit", { size: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES) }));
+		text += `\n${theme.fg("warning", `[${t("Truncated: {warnings}", { warnings: warnings.join(", ") })}]`)}`;
 	}
 	return text;
 }

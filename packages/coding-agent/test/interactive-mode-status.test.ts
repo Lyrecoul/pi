@@ -8,9 +8,16 @@ import { VirtualTerminal } from "../../tui/test/virtual-terminal.ts";
 import type { AutocompleteProviderFactory } from "../src/core/extensions/types.ts";
 import type { SourceInfo } from "../src/core/source-info.ts";
 import { setLocale } from "../src/i18n/index.ts";
+import { FirstTimeSetupComponent } from "../src/modes/interactive/components/first-time-setup.ts";
 import type { AuthSelectorProvider } from "../src/modes/interactive/components/oauth-selector.ts";
 import { InteractiveMode } from "../src/modes/interactive/interactive-mode.ts";
 import { initTheme } from "../src/modes/interactive/theme/theme.ts";
+import { stripAnsi } from "../src/utils/ansi.ts";
+
+vi.mock("../src/utils/clipboard.ts", () => ({
+	copyToClipboard: vi.fn(),
+	readClipboardText: vi.fn(),
+}));
 
 function renderLastLine(container: Container, width = 120): string {
 	const last = container.children[container.children.length - 1];
@@ -1249,5 +1256,60 @@ describe("InteractiveMode.showLoadedResources", () => {
 		const output = renderAll(fakeThis.loadedResourcesContainer);
 		expect(output).toContain("[Skill conflicts]");
 		expect(output).not.toContain("[Skills]");
+	});
+});
+
+describe("InteractiveMode.handleCopyCommand localization", () => {
+	beforeAll(() => {
+		initTheme("dark");
+	});
+
+	test("shows a localized status message when copying succeeds", async () => {
+		setLocale("zh-CN");
+		try {
+			const fakeThis = {
+				session: { getLastAssistantText: () => "assistant text" },
+				ui: {},
+				showStatus: vi.fn(),
+				showError: vi.fn(),
+			};
+
+			await (InteractiveMode as any).prototype.handleCopyCommand.call(fakeThis, { flashConfirmation: true });
+
+			expect(fakeThis.showError).not.toHaveBeenCalled();
+			expect(fakeThis.showStatus).toHaveBeenCalledWith("已将最后一条助手消息复制到剪贴板");
+		} finally {
+			setLocale("en");
+		}
+	});
+});
+
+describe("FirstTimeSetupComponent localization", () => {
+	beforeAll(() => {
+		initTheme("dark");
+	});
+
+	test("renders Chinese theme and analytics options", () => {
+		setLocale("zh-CN");
+		try {
+			const component = new FirstTimeSetupComponent({
+				detectedTheme: "dark",
+				onThemePreview: () => {},
+				onSubmit: () => {},
+				onCancel: () => {},
+			});
+
+			const themeOutput = stripAnsi(component.render(120).join("\n"));
+			expect(themeOutput).toContain("深色");
+			expect(themeOutput).toContain("浅色");
+			expect(themeOutput).not.toContain("Dark");
+
+			component.handleInput("\n");
+			const analyticsOutput = stripAnsi(component.render(120).join("\n"));
+			expect(analyticsOutput).toContain("分享匿名使用数据");
+			expect(analyticsOutput).toContain("不分享");
+		} finally {
+			setLocale("en");
+		}
 	});
 });

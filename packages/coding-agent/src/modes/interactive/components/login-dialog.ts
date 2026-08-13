@@ -88,7 +88,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 			this.inputResolver = undefined;
 			this.inputRejecter = undefined;
 		}
-		this.onComplete(false, "Login cancelled");
+		this.onComplete(false, t("Login cancelled"));
 	}
 
 	/**

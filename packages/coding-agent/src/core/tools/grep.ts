@@ -109,7 +109,7 @@ function formatGrepResult(
 		const remaining = lines.length - maxLines;
 		text += `\n${displayLines.map((line) => theme.fg("toolOutput", line)).join("\n")}`;
 		if (remaining > 0) {
-			text += `${theme.fg("muted", `\n... (${remaining} more lines,`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
+			text += `${theme.fg("muted", `\n... (${t("{n} more lines,", { n: remaining })})`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
 		}
 	}
 
@@ -118,10 +118,11 @@ function formatGrepResult(
 	const linesTruncated = result.details?.linesTruncated;
 	if (matchLimit || truncation?.truncated || linesTruncated) {
 		const warnings: string[] = [];
-		if (matchLimit) warnings.push(`${matchLimit} matches limit`);
-		if (truncation?.truncated) warnings.push(`${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit`);
-		if (linesTruncated) warnings.push("some lines truncated");
-		text += `\n${theme.fg("warning", `[Truncated: ${warnings.join(", ")}]`)}`;
+		if (matchLimit) warnings.push(t("{n} matches limit", { n: matchLimit }));
+		if (truncation?.truncated)
+			warnings.push(t("{size} limit", { size: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES) }));
+		if (linesTruncated) warnings.push(t("some lines truncated"));
+		text += `\n${theme.fg("warning", `[${t("Truncated: {warnings}", { warnings: warnings.join(", ") })}]`)}`;
 	}
 	return text;
 }

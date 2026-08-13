@@ -190,17 +190,30 @@ function formatReadResult(
 	const remaining = lines.length - maxLines;
 	let text = `\n${displayLines.map((line) => (lang ? replaceTabs(line) : theme.fg("toolOutput", replaceTabs(line)))).join("\n")}`;
 	if (remaining > 0) {
-		text += `${theme.fg("muted", `\n... (${remaining} more lines,`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
+		text += `${theme.fg("muted", `\n... (${t("{n} more lines,", { n: remaining })})`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
 	}
 
 	const truncation = result.details?.truncation;
 	if (truncation?.truncated) {
 		if (truncation.firstLineExceedsLimit) {
-			text += `\n${theme.fg("warning", `[First line exceeds ${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit]`)}`;
+			text += `\n${theme.fg("warning", `[${t("First line exceeds {limit} limit", { limit: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES) })}]`)}`;
 		} else if (truncation.truncatedBy === "lines") {
-			text += `\n${theme.fg("warning", `[Truncated: showing ${truncation.outputLines} of ${truncation.totalLines} lines (${truncation.maxLines ?? DEFAULT_MAX_LINES} line limit)]`)}`;
+			text += `\n${theme.fg(
+				"warning",
+				`[${t("Truncated: showing {shown} of {total} lines ({maxLines} line limit)", {
+					shown: truncation.outputLines,
+					total: truncation.totalLines,
+					maxLines: truncation.maxLines ?? DEFAULT_MAX_LINES,
+				})}]`,
+			)}`;
 		} else {
-			text += `\n${theme.fg("warning", `[Truncated: ${truncation.outputLines} lines shown (${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit)]`)}`;
+			text += `\n${theme.fg(
+				"warning",
+				`[${t("Truncated: {shown} lines shown ({limit} limit)", {
+					shown: truncation.outputLines,
+					limit: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES),
+				})}]`,
+			)}`;
 		}
 	}
 	return text;

@@ -6,6 +6,10 @@
 
 - Added built-in Simplified Chinese (zh-CN) localization for the interactive UI and CLI help. The locale is selected automatically from `LC_ALL`/`LC_MESSAGES`/`LANG` or explicitly via the `language` setting (`"auto"` | `"en"` | `"zh-CN"`).
 
+### Fixed
+
+- Fixed interactive UI text that bypassed the zh-CN translation layer: settings-selector labels and descriptions, model-catalog refresh and copy/save status messages, trust-decision and session-delete status text, summarize-branch dialog options, provider auth status indicators, theme-load errors, tmux keyboard warnings, and CLI help entries.
+
 ## [0.84.1] - 2026-08-07
 
 ### New Features

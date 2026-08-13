@@ -232,7 +232,7 @@ function formatDuration(ms: number): string {
 function formatBashCall(args: { command?: string; timeout?: number } | undefined): string {
 	const command = str(args?.command);
 	const timeout = args?.timeout as number | undefined;
-	const timeoutSuffix = timeout ? theme.fg("muted", ` (timeout ${timeout}s)`) : "";
+	const timeoutSuffix = timeout ? theme.fg("muted", ` (${t("timeout {timeout}s", { timeout })})`) : "";
 	const commandDisplay = command === null ? invalidArgText(theme) : command ? command : theme.fg("toolOutput", "...");
 	return theme.fg("toolTitle", theme.bold(`$ ${commandDisplay}`)) + timeoutSuffix;
 }
@@ -280,7 +280,7 @@ function rebuildBashResultRenderComponent(
 					}
 					if (state.cachedSkipped && state.cachedSkipped > 0) {
 						const hint =
-							theme.fg("muted", `... (${state.cachedSkipped} earlier lines,`) +
+							theme.fg("muted", `... (${t("{n} earlier lines,", { n: state.cachedSkipped })})`) +
 							` ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
 						return ["", truncateToWidth(hint, width, "..."), ...(state.cachedLines ?? [])];
 					}
@@ -298,14 +298,22 @@ function rebuildBashResultRenderComponent(
 	if (truncation?.truncated || fullOutputPath) {
 		const warnings: string[] = [];
 		if (fullOutputPath) {
-			warnings.push(`Full output: ${fullOutputPath}`);
+			warnings.push(t("Full output: {path}", { path: fullOutputPath }));
 		}
 		if (truncation?.truncated) {
 			if (truncation.truncatedBy === "lines") {
-				warnings.push(`Truncated: showing ${truncation.outputLines} of ${truncation.totalLines} lines`);
+				warnings.push(
+					t("Truncated: showing {shown} of {total} lines", {
+						shown: truncation.outputLines,
+						total: truncation.totalLines,
+					}),
+				);
 			} else {
 				warnings.push(
-					`Truncated: ${truncation.outputLines} lines shown (${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit)`,
+					t("Truncated: {shown} lines shown ({limit} limit)", {
+						shown: truncation.outputLines,
+						limit: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES),
+					}),
 				);
 			}
 		}
@@ -313,7 +321,7 @@ function rebuildBashResultRenderComponent(
 	}
 
 	if (startedAt !== undefined) {
-		const label = options.isPartial ? "Elapsed" : "Took";
+		const label = options.isPartial ? t("Elapsed") : t("Took");
 		const endTime = endedAt ?? Date.now();
 		component.addChild(new Text(`\n${theme.fg("muted", `${label} ${formatDuration(endTime - startedAt)}`)}`, 0, 0));
 	}

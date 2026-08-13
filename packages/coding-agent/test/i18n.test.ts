@@ -1,9 +1,23 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
 import { join } from "path";
+import { fileURLToPath } from "url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SettingsManager } from "../src/core/settings-manager.ts";
 import { detectLocaleFromEnv } from "../src/i18n/detect.ts";
 import { getLocale, resolveLocale, setLocale, t } from "../src/i18n/index.ts";
+
+function walkTsFiles(dir: string): string[] {
+	const files: string[] = [];
+	for (const entry of readdirSync(dir)) {
+		const filePath = join(dir, entry);
+		if (statSync(filePath).isDirectory()) {
+			if (entry !== "i18n") files.push(...walkTsFiles(filePath));
+		} else if (entry.endsWith(".ts")) {
+			files.push(filePath);
+		}
+	}
+	return files;
+}
 
 const originalLocaleEnv = {
 	LC_ALL: process.env.LC_ALL,
@@ -123,6 +137,27 @@ describe("i18n", () => {
 					elapsed: "305.2",
 				}),
 			).toBe("TPS 55.7 tok/s。输出 17,000，输入 9,024，缓存读/写 7,382,656/0，总计 7,408,680，305.2s");
+		});
+
+		it("covers every t() key used in src with a zh-CN translation", () => {
+			const srcDir = fileURLToPath(new URL("../src", import.meta.url));
+			const dictSource = readFileSync(join(srcDir, "i18n/zh-CN.ts"), "utf8");
+			const dictKeys = new Set<string>();
+			for (const match of dictSource.matchAll(/^\s*"((?:[^"\\]|\\.)*)":|^\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/gm)) {
+				dictKeys.add((match[1] ?? match[2]).replace(/\\n/g, "\n"));
+			}
+
+			const missing: string[] = [];
+			for (const file of walkTsFiles(srcDir)) {
+				const source = readFileSync(file, "utf8");
+				const callPattern = /(?<![A-Za-z0-9_$.])t\(\s*"((?:[^"\\]|\\.|\n)*)"/g;
+				for (const match of source.matchAll(callPattern)) {
+					const key = match[1].replace(/\\n/g, "\n");
+					if (!dictKeys.has(key)) missing.push(key);
+				}
+			}
+
+			expect([...new Set(missing)].sort()).toEqual([]);
 		});
 	});
 

@@ -60,7 +60,7 @@ function formatLsCall(args: { path?: string; limit?: number } | undefined, theme
 	const pathDisplay = renderToolPath(str(args?.path), theme, cwd, { emptyFallback: "." });
 	let text = `${theme.fg("toolTitle", theme.bold("ls"))} ${pathDisplay}`;
 	if (limit !== undefined) {
-		text += theme.fg("toolOutput", ` (limit ${limit})`);
+		text += theme.fg("toolOutput", ` (${t("limit {n}", { n: limit })})`);
 	}
 	return text;
 }
@@ -83,7 +83,7 @@ function formatLsResult(
 		const remaining = lines.length - maxLines;
 		text += `\n${displayLines.map((line) => theme.fg("toolOutput", line)).join("\n")}`;
 		if (remaining > 0) {
-			text += `${theme.fg("muted", `\n... (${remaining} more lines,`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
+			text += `${theme.fg("muted", `\n... (${t("{n} more lines,", { n: remaining })})`)} ${keyHint("app.tools.expand", t("to expand"))}${theme.fg("muted", ")")}`;
 		}
 	}
 
@@ -91,9 +91,10 @@ function formatLsResult(
 	const truncation = result.details?.truncation;
 	if (entryLimit || truncation?.truncated) {
 		const warnings: string[] = [];
-		if (entryLimit) warnings.push(`${entryLimit} entries limit`);
-		if (truncation?.truncated) warnings.push(`${formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES)} limit`);
-		text += `\n${theme.fg("warning", `[Truncated: ${warnings.join(", ")}]`)}`;
+		if (entryLimit) warnings.push(t("{n} entries limit", { n: entryLimit }));
+		if (truncation?.truncated)
+			warnings.push(t("{size} limit", { size: formatSize(truncation.maxBytes ?? DEFAULT_MAX_BYTES) }));
+		text += `\n${theme.fg("warning", `[${t("Truncated: {warnings}", { warnings: warnings.join(", ") })}]`)}`;
 	}
 	return text;
 }

@@ -1183,11 +1183,15 @@ export class InteractiveMode {
 		if (extendedKeys === undefined) return undefined;
 
 		if (extendedKeys !== "on" && extendedKeys !== "always") {
-			return "tmux extended-keys is off. Modified Enter keys may not work. Add `set -g extended-keys on` to ~/.tmux.conf and restart tmux.";
+			return t(
+				"tmux extended-keys is off. Modified Enter keys may not work. Add `set -g extended-keys on` to ~/.tmux.conf and restart tmux.",
+			);
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Pi works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return t(
+				"tmux extended-keys-format is xterm. Pi works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.",
+			);
 		}
 
 		return undefined;
@@ -2504,7 +2508,7 @@ export class InteractiveMode {
 
 	private async promptForMissingSessionCwd(error: MissingSessionCwdError): Promise<string | undefined> {
 		const confirmed = await this.showExtensionConfirm(
-			"Session cwd not found",
+			t("Session cwd not found"),
 			formatMissingSessionCwdPrompt(error.issue),
 		);
 		return confirmed ? error.issue.fallbackCwd : undefined;
@@ -3231,14 +3235,14 @@ export class InteractiveMode {
 						errorMessage =
 							retryAttempt > 0
 								? t("Aborted after {n} retry attempts", { n: retryAttempt })
-								: "Operation aborted";
+								: t("Operation aborted");
 						this.streamingMessage.errorMessage = errorMessage;
 					}
 					this.streamingComponent.updateContent(this.streamingMessage, false);
 
 					if (this.streamingMessage.stopReason === "aborted" || this.streamingMessage.stopReason === "error") {
 						if (!errorMessage) {
-							errorMessage = this.streamingMessage.errorMessage || "Error";
+							errorMessage = this.streamingMessage.errorMessage || t("Error");
 						}
 						for (const [, component] of this.pendingTools.entries()) {
 							component.updateResult({
@@ -3658,9 +3662,9 @@ export class InteractiveMode {
 								errorMessage =
 									retryAttempt > 0
 										? t("Aborted after {n} retry attempts", { n: retryAttempt })
-										: "Operation aborted";
+										: t("Operation aborted");
 							} else {
-								errorMessage = message.errorMessage || "Error";
+								errorMessage = message.errorMessage || t("Error");
 							}
 							component.updateResult({ content: [{ type: "text", text: errorMessage }], isError: true });
 						} else {
@@ -4674,7 +4678,7 @@ export class InteractiveMode {
 		const cachedMatch = findExactModelReferenceMatch(searchTerm, cachedModels);
 		if (cachedMatch || this.session.scopedModels.length > 0) return cachedMatch;
 
-		this.showStatus("Refreshing model catalogs…");
+		this.showStatus(t("Refreshing model catalogs…"));
 		const controller = new AbortController();
 		let timedOut = false;
 		const timeout = setTimeout(() => {
@@ -4684,15 +4688,21 @@ export class InteractiveMode {
 		try {
 			const result = await this.session.modelRuntime.refresh({ signal: controller.signal });
 			if (result.aborted && timedOut) {
-				this.showWarning("Model refresh timed out; searching cached models.");
+				this.showWarning(t("Model refresh timed out; searching cached models."));
 			} else if (result.errors.size > 0) {
-				this.showWarning(`Could not refresh ${[...result.errors.keys()].join(", ")}; searching cached models.`);
+				this.showWarning(
+					t("Could not refresh {providers}; searching cached models.", {
+						providers: [...result.errors.keys()].join(", "),
+					}),
+				);
 			}
 		} catch (error) {
 			this.showWarning(
 				timedOut
-					? "Model refresh timed out; searching cached models."
-					: `Could not refresh model catalogs: ${error instanceof Error ? error.message : String(error)}`,
+					? t("Model refresh timed out; searching cached models.")
+					: t("Could not refresh model catalogs: {details}", {
+							details: error instanceof Error ? error.message : String(error),
+						}),
 			);
 		} finally {
 			clearTimeout(timeout);
@@ -4779,7 +4789,9 @@ export class InteractiveMode {
 					trustStore.setMany(selection.updates);
 					done();
 					this.showStatus(
-						`Saved trust decision: ${selection.trusted ? "trusted" : "untrusted"}. Restart pi for this to take effect.`,
+						t("Saved trust decision: {decision}. Restart pi for this to take effect.", {
+							decision: selection.trusted ? t("trusted") : t("untrusted"),
+						}),
 					);
 				},
 				onCancel: () => {
@@ -4890,7 +4902,7 @@ export class InteractiveMode {
 							enabledIds.every((id) => availableModelIds.has(id));
 						const newPatterns = enabledIds === null || allEnabled ? undefined : enabledIds;
 						this.settingsManager.setEnabledModels(newPatterns ? [...newPatterns] : undefined);
-						this.showStatus("Model selection saved to settings");
+						this.showStatus(t("Model selection saved to settings"));
 					},
 					onCancel: () => {
 						done();
@@ -5038,10 +5050,12 @@ export class InteractiveMode {
 					// Check if we should skip the prompt (user preference to always default to no summary)
 					if (!this.settingsManager.getBranchSummarySkipPrompt()) {
 						while (true) {
-							const summaryChoice = await this.showExtensionSelector("Summarize branch?", [
-								"No summary",
-								"Summarize",
-								"Summarize with custom prompt",
+							const noSummary = t("No summary");
+							const summarizeCustom = t("Summarize with custom prompt");
+							const summaryChoice = await this.showExtensionSelector(t("Summarize branch?"), [
+								noSummary,
+								t("Summarize"),
+								summarizeCustom,
 							]);
 
 							if (summaryChoice === undefined) {
@@ -5050,10 +5064,10 @@ export class InteractiveMode {
 								return;
 							}
 
-							wantsSummary = summaryChoice !== "No summary";
+							wantsSummary = summaryChoice !== noSummary;
 
-							if (summaryChoice === "Summarize with custom prompt") {
-								customInstructions = await this.showExtensionEditor("Custom summarization instructions");
+							if (summaryChoice === summarizeCustom) {
+								customInstructions = await this.showExtensionEditor(t("Custom summarization instructions"));
 								if (customInstructions === undefined) {
 									// User cancelled - loop back to summary selector
 									continue;
@@ -5421,7 +5435,11 @@ export class InteractiveMode {
 		try {
 			providerOptions = await this.getLogoutProviderOptions();
 		} catch (error) {
-			this.showError(`Could not read stored credentials: ${error instanceof Error ? error.message : String(error)}`);
+			this.showError(
+				t("Could not read stored credentials: {error}", {
+					error: error instanceof Error ? error.message : String(error),
+				}),
+			);
 			return;
 		}
 		if (providerOptions.length === 0) {
@@ -5477,7 +5495,10 @@ export class InteractiveMode {
 		authType: "oauth" | "api_key",
 		previousModel: Model<any> | undefined,
 	): Promise<void> {
-		const actionLabel = authType === "oauth" ? `Logged in to ${providerName}` : `Saved API key for ${providerName}`;
+		const actionLabel =
+			authType === "oauth"
+				? t("Logged in to {name}", { name: providerName })
+				: t("Saved API key for {name}", { name: providerName });
 
 		let selectedModel: Model<any> | undefined;
 		let selectionError: string | undefined;
@@ -5485,21 +5506,44 @@ export class InteractiveMode {
 			const availableModels = this.session.modelRuntime.getAvailableSnapshot();
 			const providerModels = availableModels.filter((model) => model.provider === providerId);
 			if (!hasDefaultModelProvider(providerId)) {
-				selectionError = `${actionLabel}, but no default model is configured for provider "${providerId}". Use /model to select a model.`;
+				selectionError = t(
+					'{action}, but no default model is configured for provider "{provider}". Use /model to select a model.',
+					{
+						action: actionLabel,
+						provider: providerId,
+					},
+				);
 			} else if (providerModels.length === 0) {
-				selectionError = `${actionLabel}, but no models are available for that provider. Use /model to select a model.`;
+				selectionError = t(
+					"{action}, but no models are available for that provider. Use /model to select a model.",
+					{
+						action: actionLabel,
+					},
+				);
 			} else {
 				const defaultModelId = defaultModelPerProvider[providerId];
 				selectedModel = providerModels.find((model) => model.id === defaultModelId);
 				if (!selectedModel) {
-					selectionError = `${actionLabel}, but its default model "${defaultModelId}" is not available. Use /model to select a model.`;
+					selectionError = t(
+						'{action}, but its default model "{model}" is not available. Use /model to select a model.',
+						{
+							action: actionLabel,
+							model: defaultModelId,
+						},
+					);
 				} else {
 					try {
 						await this.session.setModel(selectedModel);
 					} catch (error: unknown) {
 						selectedModel = undefined;
 						const errorMessage = error instanceof Error ? error.message : String(error);
-						selectionError = `${actionLabel}, but selecting its default model failed: ${errorMessage}. Use /model to select a model.`;
+						selectionError = t(
+							"{action}, but selecting its default model failed: {error}. Use /model to select a model.",
+							{
+								action: actionLabel,
+								error: errorMessage,
+							},
+						);
 					}
 				}
 			}
@@ -5533,9 +5577,15 @@ export class InteractiveMode {
 			.refresh({ providers: [providerId], signal: controller.signal })
 			.then((result) => {
 				if (result.aborted) {
-					this.showWarning(`${actionLabel}, but its model catalog refresh timed out; using cached models.`);
+					this.showWarning(
+						t("{action}, but its model catalog refresh timed out; using cached models.", { action: actionLabel }),
+					);
 				} else if (result.errors.size > 0) {
-					this.showWarning(`${actionLabel}, but its model catalog could not be refreshed; using cached models.`);
+					this.showWarning(
+						t("{action}, but its model catalog could not be refreshed; using cached models.", {
+							action: actionLabel,
+						}),
+					);
 				}
 				this.updateAvailableProviderCount();
 				this.footer.invalidate();
@@ -5543,7 +5593,10 @@ export class InteractiveMode {
 			})
 			.catch((error: unknown) => {
 				this.showWarning(
-					`${actionLabel}, but its model catalog could not be refreshed: ${error instanceof Error ? error.message : String(error)}`,
+					t("{action}, but its model catalog could not be refreshed: {error}", {
+						action: actionLabel,
+						error: error instanceof Error ? error.message : String(error),
+					}),
 				);
 			})
 			.finally(() => clearTimeout(timeout));
@@ -5617,10 +5670,15 @@ export class InteractiveMode {
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			if (error instanceof CredentialSynchronizationError) {
 				this.showError(
-					`Saved API key for ${providerName}, but local model state could not be synchronized: ${errorMsg}`,
+					t("Saved API key for {name}, but local model state could not be synchronized: {error}", {
+						name: providerName,
+						error: errorMsg,
+					}),
 				);
 			} else if (errorMsg !== "Login cancelled") {
-				this.showError(`Failed to save API key for ${providerName}: ${errorMsg}`);
+				this.showError(
+					t("Failed to save API key for {provider}: {error}", { provider: providerName, error: errorMsg }),
+				);
 			}
 		}
 	}
@@ -5734,7 +5792,7 @@ export class InteractiveMode {
 					`Logged in to ${providerName}, but local model state could not be synchronized: ${errorMsg}`,
 				);
 			} else if (errorMsg !== "Login cancelled") {
-				this.showError(`Failed to login to ${providerName}: ${errorMsg}`);
+				this.showError(t("Failed to login to {provider}: {error}", { provider: providerName, error: errorMsg }));
 			}
 		}
 	}
@@ -6034,7 +6092,7 @@ export class InteractiveMode {
 	private async handleCopyCommand(options: { flashConfirmation?: boolean } = {}): Promise<void> {
 		const text = this.session.getLastAssistantText();
 		if (!text) {
-			this.showError("No agent messages to copy yet.");
+			this.showError(t("No agent messages to copy yet."));
 			return;
 		}
 
@@ -6043,7 +6101,7 @@ export class InteractiveMode {
 			if (options.flashConfirmation && this.ui instanceof TuiAltScreen) {
 				this.ui.flash("Copied!");
 			} else {
-				this.showStatus("Copied last agent message to clipboard");
+				this.showStatus(t("Copied last agent message to clipboard"));
 			}
 		} catch (error) {
 			this.showError(error instanceof Error ? error.message : String(error));

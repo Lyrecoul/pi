@@ -495,109 +495,114 @@ export class SettingsSelectorComponent extends Container {
 		const items: SettingItem[] = [
 			{
 				id: "autocompact",
-				label: "Auto-compact",
-				description: "Automatically compact context when it gets too large",
+				label: t("Auto-compact"),
+				description: t("Automatically compact context when it gets too large"),
 				currentValue: config.autoCompact ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "steering-mode",
-				label: "Steering mode",
-				description:
+				label: t("Steering mode"),
+				description: t(
 					"Enter while streaming queues steering messages. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
+				),
 				currentValue: config.steeringMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "follow-up-mode",
-				label: "Follow-up mode",
-				description: `${followUpKey} queues follow-up messages until agent stops. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.`,
+				label: t("Follow-up mode"),
+				description: t(
+					"{followUpKey} queues follow-up messages until agent stops. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
+					{ followUpKey },
+				),
 				currentValue: config.followUpMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "transport",
-				label: "Transport",
-				description: "Preferred transport for providers that support multiple transports",
+				label: t("Transport"),
+				description: t("Preferred transport for providers that support multiple transports"),
 				currentValue: config.transport,
 				values: ["sse", "websocket", "websocket-cached", "auto"],
 			},
 			{
 				id: "http-idle-timeout",
-				label: "HTTP idle timeout",
-				description:
+				label: t("HTTP idle timeout"),
+				description: t(
 					"Maximum idle gap while waiting for HTTP headers or body chunks. Disable for local models that pause longer than five minutes.",
-				currentValue: formatHttpIdleTimeoutMs(config.httpIdleTimeoutMs),
-				values: HTTP_IDLE_TIMEOUT_CHOICES.map((choice) => choice.label),
+				),
+				currentValue: t(formatHttpIdleTimeoutMs(config.httpIdleTimeoutMs)),
+				values: HTTP_IDLE_TIMEOUT_CHOICES.map((choice) => t(choice.label)),
 			},
 			{
 				id: "hide-thinking",
-				label: "Hide thinking",
-				description: "Hide thinking blocks in assistant responses",
+				label: t("Hide thinking"),
+				description: t("Hide thinking blocks in assistant responses"),
 				currentValue: config.hideThinkingBlock ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "mermaid-rendering",
-				label: "Mermaid diagrams",
-				description: "Render Mermaid code blocks as Unicode diagrams",
+				label: t("Mermaid diagrams"),
+				description: t("Render Mermaid code blocks as Unicode diagrams"),
 				currentValue: config.mermaidRenderingMode,
 				values: ["off", "final", "streaming"],
 			},
 			{
 				id: "cache-miss-notices",
-				label: "Cache miss notices",
-				description: "Show transcript notices for significant prompt-cache misses",
+				label: t("Cache miss notices"),
+				description: t("Show transcript notices for significant prompt-cache misses"),
 				currentValue: config.showCacheMissNotices ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "collapse-changelog",
-				label: "Collapse changelog",
-				description: "Show condensed changelog after updates",
+				label: t("Collapse changelog"),
+				description: t("Show condensed changelog after updates"),
 				currentValue: config.collapseChangelog ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "quiet-startup",
-				label: "Quiet startup",
-				description: "Disable verbose printing at startup",
+				label: t("Quiet startup"),
+				description: t("Disable verbose printing at startup"),
 				currentValue: config.quietStartup ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "install-telemetry",
-				label: "Install telemetry",
-				description: "Send an anonymous version/update ping after changelog-detected updates",
+				label: t("Install telemetry"),
+				description: t("Send an anonymous version/update ping after changelog-detected updates"),
 				currentValue: config.enableInstallTelemetry ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "default-project-trust",
-				label: "Default project trust",
-				description: "Fallback behavior when no extension or saved trust decision decides project trust",
-				currentValue: DEFAULT_PROJECT_TRUST_LABELS[config.defaultProjectTrust],
-				values: Object.values(DEFAULT_PROJECT_TRUST_LABELS),
+				label: t("Default project trust"),
+				description: t("Fallback behavior when no extension or saved trust decision decides project trust"),
+				currentValue: t(DEFAULT_PROJECT_TRUST_LABELS[config.defaultProjectTrust]),
+				values: Object.values(DEFAULT_PROJECT_TRUST_LABELS).map((label) => t(label)),
 			},
 			{
 				id: "double-escape-action",
-				label: "Double-escape action",
-				description: "Action when pressing Escape twice with empty editor",
+				label: t("Double-escape action"),
+				description: t("Action when pressing Escape twice with empty editor"),
 				currentValue: config.doubleEscapeAction,
 				values: ["tree", "fork", "none"],
 			},
 			{
 				id: "tree-filter-mode",
-				label: "Tree filter mode",
-				description: "Default filter when opening /tree",
+				label: t("Tree filter mode"),
+				description: t("Default filter when opening /tree"),
 				currentValue: config.treeFilterMode,
 				values: ["default", "no-tools", "user-only", "labeled-only", "all"],
 			},
 			{
 				id: "warnings",
-				label: "Warnings",
-				description: "Enable or disable individual warnings",
-				currentValue: "configure",
+				label: t("Warnings"),
+				description: t("Enable or disable individual warnings"),
+				currentValue: t("configure"),
 				submenu: (_currentValue, done) =>
 					new WarningSettingsSubmenu(
 						currentWarnings,
@@ -639,15 +644,15 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "fullscreen-scrollbar",
-				label: "Fullscreen scrollbar",
-				description: "Scrollbar behavior in fullscreen mode; has no effect in regular mode",
+				label: t("Fullscreen scrollbar"),
+				description: t("Scrollbar behavior in fullscreen mode; has no effect in regular mode"),
 				currentValue: config.fullscreenScrollbar,
 				values: ["auto", "always", "hidden"],
 			},
 			{
 				id: "theme",
-				label: "Theme",
-				description: "Color theme for the interface",
+				label: t("Theme"),
+				description: t("Color theme for the interface"),
 				currentValue: config.currentTheme,
 				submenu: (currentValue, done) =>
 					new ThemeSubmenu(currentValue, config.terminalTheme, config.availableThemes, callbacks, done),
@@ -799,7 +804,7 @@ export class SettingsSelectorComponent extends Container {
 						callbacks.onTransportChange(newValue as Transport);
 						break;
 					case "http-idle-timeout": {
-						const choice = HTTP_IDLE_TIMEOUT_CHOICES.find((item) => item.label === newValue);
+						const choice = HTTP_IDLE_TIMEOUT_CHOICES.find((item) => t(item.label) === newValue);
 						if (choice) {
 							callbacks.onHttpIdleTimeoutMsChange(choice.timeoutMs);
 						}

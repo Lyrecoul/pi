@@ -848,12 +848,15 @@ export class SessionSelectorComponent extends Container implements Focusable {
 				const showCwd = this.scope === "all";
 				this.sessionList.setSessions(sessions, showCwd);
 
-				const msg = result.method === "trash" ? "Session moved to trash" : "Session deleted";
+				const msg = result.method === "trash" ? t("Session moved to trash") : t("Session deleted");
 				this.header.setStatusMessage({ type: "info", message: msg }, 2000);
 				await this.refreshSessionsAfterMutation();
 			} else {
-				const errorMessage = result.error ?? "Unknown error";
-				this.header.setStatusMessage({ type: "error", message: `Failed to delete: ${errorMessage}` }, 3000);
+				const errorMessage = result.error ?? t("Unknown error");
+				this.header.setStatusMessage(
+					{ type: "error", message: t("Failed to delete: {error}", { error: errorMessage }) },
+					3000,
+				);
 			}
 
 			this.requestRender();

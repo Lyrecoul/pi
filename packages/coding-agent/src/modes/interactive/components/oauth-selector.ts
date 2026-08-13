@@ -163,9 +163,9 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 	}
 
 	private formatStatusIndicator(provider: AuthSelectorProvider): string {
-		if (!provider.status) return theme.fg("muted", " • unconfigured");
+		if (!provider.status) return theme.fg("muted", ` • ${t("unconfigured")}`);
 		if (provider.status.type !== provider.authType) {
-			const label = provider.status.type === "oauth" ? "subscription configured" : "API key configured";
+			const label = provider.status.type === "oauth" ? t("subscription configured") : t("API key configured");
 			return theme.fg("muted", " • ") + theme.fg("warning", label);
 		}
 		if (
@@ -173,7 +173,7 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 			provider.status.source === "OAuth" ||
 			provider.status.source === "stored credential"
 		) {
-			return theme.fg("success", " ✓ configured");
+			return theme.fg("success", ` ✓ ${t("configured")}`);
 		}
 		const source = /^[A-Z][A-Z0-9_]*(?:, [A-Z][A-Z0-9_]*)*$/.test(provider.status.source)
 			? `env: ${provider.status.source}`
