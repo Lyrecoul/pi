@@ -1,4 +1,4 @@
-import { CONFIG_DIR_NAME } from "../config.ts";
+import { APP_NAME, CONFIG_DIR_NAME } from "../config.ts";
 import { t } from "../i18n/index.ts";
 import { emitProjectTrustEvent } from "./extensions/runner.ts";
 import type { LoadExtensionsResult, ProjectTrustContext } from "./extensions/types.ts";
@@ -24,8 +24,9 @@ export interface ResolveProjectTrustedOptions {
 
 function formatProjectTrustPrompt(cwd: string): string {
 	return t(
-		"Trust project folder?\n{cwd}\n\nThis allows pi to load {configDir} settings and resources, install missing project packages, and execute project extensions.",
+		"Trust project folder?\n{cwd}\n\nThis allows {app} to load {configDir} settings and resources, install missing project packages, and execute project extensions.",
 		{
+			app: APP_NAME,
 			cwd,
 			configDir: CONFIG_DIR_NAME,
 		},

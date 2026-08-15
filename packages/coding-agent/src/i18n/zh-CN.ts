@@ -198,7 +198,7 @@ export const zhCN: Readonly<Record<string, string>> = {
 	"{action}. Selected {model}. Credentials saved to {path}": "{action}。已选择 {model}。凭据已保存到 {path}",
 	"{action}. Credentials saved to {path}": "{action}。凭据已保存到 {path}",
 	"{name} setup": "{name} 设置",
-	"{method} is configured outside pi.": "{method} 已在 pi 外部配置。",
+	"{method} is configured outside {app}.": "{method} 已在 pi 外部配置。",
 	Authentication: "认证",
 	"You can also use an AWS profile, IAM keys, or role-based credentials.":
 		"您也可以使用 AWS profile、IAM 密钥或基于角色的凭据。",
@@ -372,7 +372,7 @@ export const zhCN: Readonly<Record<string, string>> = {
 	"Trust (this session only)": "信任（仅本次会话）",
 	"Do not trust": "不信任",
 	"Do not trust (this session only)": "不信任（仅本次会话）",
-	"Trust project folder?\n{cwd}\n\nThis allows pi to load {configDir} settings and resources, install missing project packages, and execute project extensions.":
+	"Trust project folder?\n{cwd}\n\nThis allows {app} to load {configDir} settings and resources, install missing project packages, and execute project extensions.":
 		"信任项目文件夹？\n{cwd}\n\n这将允许 pi 加载 {configDir} 设置和资源、安装缺失的项目包，并执行项目扩展。",
 	"{label} (inherited from {path})": "{label}（继承自 {path}）",
 	"{label} ({path})": "{label}（{path}）",
@@ -815,6 +815,8 @@ export const zhCN: Readonly<Record<string, string>> = {
 	"Load a prompt template file or directory (can be used multiple times)": "加载提示词模板文件或目录（可多次使用）",
 	"Disable prompt template discovery and loading": "禁用提示词模板发现和加载",
 	"Load a theme file or directory (can be used multiple times)": "加载主题文件或目录（可多次使用）",
+	"Set the initial interactive theme for this run without changing settings":
+		"为本次运行设置初始交互主题，不更改已保存的设置",
 	"Disable theme discovery and loading": "禁用主题发现和加载",
 	"Disable AGENTS.md and CLAUDE.md discovery and loading": "禁用 AGENTS.md 和 CLAUDE.md 的发现和加载",
 	"Export session file to HTML and exit": "将会话文件导出为 HTML 并退出",
@@ -916,7 +918,7 @@ export const zhCN: Readonly<Record<string, string>> = {
 	"Unknown package command error": "未知的包命令错误",
 	"Error: {message}": "错误：{message}",
 	"{app} cannot self-update this installation.": "{app} 无法自更新此安装。",
-	"Location of pi executable: {path}": "pi 可执行文件位置：{path}",
+	"Location of {app} executable: {path}": "pi 可执行文件位置：{path}",
 	"If this keeps failing, run this command yourself: {command}": "如果持续失败，请自行运行此命令：{command}",
 	"If pnpm reports missing package versions, its cached registry metadata may be stale.":
 		"如果 pnpm 报告缺少软件包版本，其缓存的注册表元数据可能已过期。",
@@ -1011,7 +1013,7 @@ export const zhCN: Readonly<Record<string, string>> = {
 	"API key configured": "已配置 API 密钥",
 	unconfigured: "未配置",
 	configured: "已配置",
-	"Saved trust decision: {decision}. Restart pi for this to take effect.":
+	"Saved trust decision: {decision}. Restart {app} for this to take effect.":
 		"已保存信任决策：{decision}。重启 pi 后生效。",
 	"Model refresh timed out; searching cached models.": "模型目录刷新超时；正在搜索缓存的模型。",
 	"Could not refresh {providers}; searching cached models.": "无法刷新 {providers}；正在搜索缓存的模型。",

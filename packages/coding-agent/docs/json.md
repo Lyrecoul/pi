@@ -11,17 +11,15 @@ pi --mode json "Your prompt"
 事件定义在 [`AgentSessionEvent`](https://github.com/earendil-works/pi-mono/blob/main/packages/coding-agent/src/core/agent-session.ts#L102) 中：
 
 ```typescript
-type AgentSessionEvent =
-  | AgentEvent
-  | { type: "queue_update"; steering: readonly string[]; followUp: readonly string[] }
-  | { type: "compaction_start"; reason: "manual" | "threshold" | "overflow" }
-  | { type: "compaction_end"; reason: "manual" | "threshold" | "overflow"; result: CompactionResult | undefined; aborted: boolean; willRetry: boolean; errorMessage?: string }
-  | { type: "auto_retry_start"; attempt: number; maxAttempts: number; delayMs: number; errorMessage: string }
-  | { type: "auto_retry_end"; success: boolean; attempt: number; finalError?: string }
-  | { type: "summarization_retry_scheduled"; attempt: number; maxAttempts: number; delayMs: number; errorMessage: string }
-  | { type: "summarization_retry_attempt_start"; source: "branchSummary" }
-  | { type: "summarization_retry_attempt_start"; source: "compaction"; reason: "manual" | "threshold" | "overflow" }
-  | { type: "summarization_retry_finished" };
+type WithoutPartial<T> = T extends { partial: unknown } ? Omit<T, "partial"> : T;
+
+type JsonAgentSessionEvent =
+  | Exclude<AgentSessionEvent, { type: "message_update" }>
+  | {
+      type: "message_update";
+      usage: Usage;
+      assistantMessageEvent: WithoutPartial<AssistantMessageEvent>;
+    };
 ```
 
 `queue_update` 在待处理的 steering 和 follow-up 队列发生变化时发出完整队列。`compaction_start` 和 `compaction_end` 涵盖手动和自动压缩。
@@ -73,11 +71,13 @@ type AgentEvent =
 {"type":"agent_start"}
 {"type":"turn_start"}
 {"type":"message_start","message":{"role":"assistant","content":[],...}}
-{"type":"message_update","message":{...},"assistantMessageEvent":{"type":"text_delta","delta":"Hello",...}}
+{"type":"message_update","usage":{...},"assistantMessageEvent":{"type":"text_delta","contentIndex":0,"delta":"Hello"}}
 {"type":"message_end","message":{...}}
 {"type":"turn_end","message":{...},"toolResults":[]}
 {"type":"agent_end","messages":[...]}
 ```
+
+`message_update` 记录仅包含增量。它们省略累积的 `message` 字段和 `assistantMessageEvent.partial`，以保持流大小线性增长。顶层的 `usage` 字段包含最新的累计提供商报告用量，当提供商只在完成时报告用量时可能保持为零。如有需要，可使用 `contentIndex` 和 `delta` 拼装实时的文本、思维或工具调用参数。`message_end` 包含最终的权威消息。
 
 ## 示例
 

@@ -39,8 +39,23 @@ Pi 从以下位置加载主题：
 
 首次运行时，pi 会检测你的终端背景，默认选择 `dark` 或 `light`。
 
-## 创建自定义主题
+### 初始主题
 
+在不更改已保存设置的情况下，以某个主题启动交互式运行：
+
+```bash
+pi --use-theme light
+```
+
+要跟随终端外观，使用 `lightTheme/darkTheme` 语法：
+
+```bash
+pi --use-theme light/dark
+```
+
+CLI 值是本次运行的初始主题。之后在 `/settings` 中选择其他主题会立即生效并正常保存。
+
+## 创建自定义主题
 1. 创建主题文件：
 
 ```bash
@@ -72,6 +87,8 @@ vim ~/.pi/agent/themes/my-theme.json
     "thinkingText": "secondary",
     "selectedBg": "#2d2d30",
     "scrollbarThumb": "#555566",
+    "searchMatchBg": "#2d2d30",
+    "searchMatchText": "",
     "userMessageBg": "#2d2d30",
     "userMessageText": "",
     "customMessageBg": "#2d2d30",
@@ -141,14 +158,12 @@ vim ~/.pi/agent/themes/my-theme.json
 
 - `name` 是必需的，必须唯一，且不能包含 `/`。
 - `vars` 是可选的。在此定义可复用的颜色，然后在 `colors` 中引用它们。
-- `colors` 必须定义全部 51 个必需 token。`thinkingMax` 是可选的，回退到 `thinkingXhigh`；`scrollbarThumb` 是可选的，回退到 `selectedBg`。
-
+- `colors` 必须定义全部 51 个必需 token。`thinkingMax`、`scrollbarThumb` 和两个搜索高亮 token 是可选的，使用下文列出的回退值。
 `$schema` 字段可启用编辑器的自动补全和校验。
 
 ## 颜色 Token
 
-每个主题必须定义全部 51 个必需的颜色 token。`thinkingMax` 和 `scrollbarThumb` 为兼容现有主题而可选；省略时分别使用 `thinkingXhigh` 和 `selectedBg`。
-
+每个主题必须定义全部 51 个必需的颜色 token。可选 token 为兼容现有主题而保留：`thinkingMax` 回退到 `thinkingXhigh`，`scrollbarThumb` 和 `searchMatchBg` 回退到 `selectedBg`，`searchMatchText` 回退到 `text`。其他搜索匹配使用 `searchMatchText` 前景色配 `searchMatchBg` 背景色并带下划线；当前匹配反转该前景/背景组合并使用粗体文本。
 ### 核心 UI（11 种颜色）
 
 | Token | 用途 |
@@ -165,12 +180,13 @@ vim ~/.pi/agent/themes/my-theme.json
 | `text` | 默认文本（通常为 `""`） |
 | `thinkingText` | 思考块文本 |
 
-### 背景与内容（11 个必需，1 个可选）
-
+### 背景与内容（11 个必需，3 个可选）
 | Token | 用途 |
 |-------|---------|
 | `selectedBg` | 选中行背景 |
 | `scrollbarThumb` | 全屏滚动条滑块背景；可选，回退到 `selectedBg` |
+| `searchMatchBg` | 转录搜索匹配背景和当前匹配文本；可选，回退到 `selectedBg` |
+| `searchMatchText` | 转录搜索匹配文本和当前匹配背景；可选，回退到 `text` |
 | `userMessageBg` | 用户消息背景 |
 | `userMessageText` | 用户消息文本 |
 | `customMessageBg` | 扩展消息背景 |
@@ -181,7 +197,6 @@ vim ~/.pi/agent/themes/my-theme.json
 | `toolErrorBg` | 工具框（错误） |
 | `toolTitle` | 工具标题 |
 | `toolOutput` | 工具输出文本 |
-
 ### Markdown（10 种颜色）
 
 | Token | 用途 |

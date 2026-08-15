@@ -66,8 +66,9 @@ Pi 使用 JSON 设置文件，项目设置覆盖全局设置。
 | `outputPad` | number | `1` | 用户消息、助手消息和思维的水平内边距（0 或 1） |
 | `autocompleteMaxVisible` | number | `5` | 自动补全下拉菜单中可见的最大项数（3-20） |
 | `showHardwareCursor` | boolean | `false` | 在 TUI 定位光标以支持 IME 时显示终端光标；启用后隐藏软件光标，只保留终端光标，避免双重光标 |
-| `uiMode` | string | `"regular"` | 交互 UI 模式：`"regular"` 或实验性的 `"fullscreen"`。通过 `/settings` 的更改在重启后生效；`--ui-mode` 在单次运行中覆盖此设置 |
-| `fullscreenScrollbar` | string | `"auto"` | 全屏转录滚动条：`"auto"` 在滚动时临时显示，`"always"` 保留最右列并保持可见，`"hidden"` 隐藏它。在普通 UI 模式下无效 |
+| `tuiMode` | string | `"regular"` | 交互 TUI 模式：`"regular"` 或实验性的 `"fullscreen"`。`/settings` 中的更改立即生效；`--tui-mode` 在启动时覆盖此设置 |
+| `fullscreenExitOutput` | string | `"transcript"` | 全屏退出输出：`"transcript"` 打印最终转录和恢复提示，而 `"resume-hint"` 恢复之前的屏幕并只打印会话恢复提示。在常规 TUI 模式下无效 |
+| `fullscreenScrollbar` | string | `"auto"` | 全屏转录滚动条：`"auto"` 在滚动时临时显示，`"always"` 保留最右列并保持可见，`"hidden"` 隐藏它。在常规 TUI 模式下无效 |
 
 对于 VS Code，加入 `--wait` 以便 pi 在编辑器退出后恢复：
 
@@ -192,6 +193,20 @@ Pi 使用 JSON 设置文件，项目设置覆盖全局设置。
 | `shellCommandPrefix` | string | - | 每条 bash 命令的前缀（如 `"shopt -s expand_aliases"`） |
 | `npmCommand` | string[] | - | 用于 npm 包查找/安装操作的命令 argv（如 `["mise", "exec", "node@20", "--", "npm"]`） |
 
+JSON 中的 Windows 路径必须使用正斜杠或转义反斜杠：
+
+```json
+{
+  "shellPath": "C:/Program Files/Git/bin/bash.exe"
+}
+```
+
+```json
+{
+  "shellPath": "C:\\Program Files\\Git\\bin\\bash.exe"
+}
+```
+
 ```json
 {
   "npmCommand": ["mise", "exec", "node@20", "--", "npm"]
@@ -199,6 +214,22 @@ Pi 使用 JSON 设置文件，项目设置覆盖全局设置。
 ```
 
 `npmCommand` 用于所有 npm 包管理器操作，包括安装、卸载以及 git 包内的依赖安装。用户级 npm 包安装到 `~/.pi/agent/npm/` 下；项目级 npm 包安装到 `.pi/npm/` 下。使用与进程启动方式完全一致的 argv 风格条目。配置了 `npmCommand` 后，git 包依赖安装使用普通的 `install`，以避免在包装器或替代包管理器中引入 npm 特定标志。
+
+### 工具
+
+| 设置 | 类型 | 默认值 | 描述 |
+|---------|------|---------|-------------|
+| `defaultTools` | string[] | - | 启动时启用的内置工具。省略时 Pi 使用其标准默认值 |
+
+`defaultTools` 选择启动时启用的内置工具。扩展和 SDK 自定义工具保持启用：
+
+```json
+{
+  "defaultTools": ["bash", "edit", "write"]
+}
+```
+
+空数组表示不启动内置工具，同时保留扩展和 SDK 自定义工具。`--tools` 用对所有工具的严格允许列表取代此行为，`--no-tools` 禁用所有工具，`--no-builtin-tools` 禁用内置默认值。`--exclude-tools` 过滤最终列表。项目级 `defaultTools` 数组会替换全局数组。
 
 ### 会话
 

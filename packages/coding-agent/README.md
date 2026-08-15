@@ -605,7 +605,8 @@ cat README.md | pi -p "Summarize this text"
 |--------|-------------|
 | `--system-prompt <text>` | 替换默认提示词（上下文文件和技能仍会追加） |
 | `--append-system-prompt <text>` | 追加到系统提示词 |
-| `--ui-mode <mode>` | UI 模式：`regular`（默认）或实验性的 `fullscreen` |
+| `--tui-mode <mode>` | TUI 模式：`regular`（默认）或实验性的 `fullscreen` |
+| `--use-theme <name[/name]>` | 为本次运行设置初始交互主题，不更改已保存的设置 |
 | `--verbose` | 强制详细启动输出 |
 | `-a`, `--approve` | 本次运行信任项目本地文件 |
 | `-na`, `--no-approve` | 本次运行忽略项目本地文件 |

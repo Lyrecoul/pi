@@ -82,7 +82,7 @@
 
 ### TUI 全屏视口
 
-这些动作在交互模式使用 `--ui-mode fullscreen` 时生效，针对主要转录滚动区域。双指触控板和鼠标滚轮输入滚动指针下的区域，回退为在固定的编辑器/状态/底部栏停靠区上方滚动转录内容。点击 OSC 8 超链接会在默认处理程序中打开。用主鼠标按钮拖动可选择文本并复制到剪贴板；在转录内容的顶部或底部边缘按住会自动滚动到屏幕外内容。
+这些动作在交互模式使用 `--tui-mode fullscreen` 时生效，针对主要转录滚动区域。双指触控板和鼠标滚轮输入滚动指针下的区域，回退为在固定的编辑器/状态/底部栏停靠区上方滚动转录内容。点击 OSC 8 超链接会在默认处理程序中打开。用主鼠标按钮拖动可选择文本并复制到剪贴板；在转录内容的顶部或底部边缘按住会自动滚动到屏幕外内容。参见[终端配置](terminal-setup.md)了解终端特定的鼠标和触控板行为。
 
 全屏转录绑定优先于编辑器绑定。因此，在全屏模式下默认的未修饰导航键控制转录，`ctrl` 变体继续控制编辑器。在全屏模式外，两种变体均控制编辑器。
 
@@ -93,7 +93,7 @@
 | `pageUp`、`pageDown` | 编辑器 | 转录 |
 | `ctrl+pageUp`、`ctrl+pageDown` | 编辑器 | 编辑器 |
 
-此路由可通过普通动作绑定配置。例如，`"tui.altScreen.pageUp": "ctrl+pageUp"` 使 `pageUp` 控制编辑器，`ctrl+pageUp` 在全屏模式中控制转录。绑定 `tui.altScreen.halfPageUp` 和 `tui.altScreen.halfPageDown` 可使用较小的转录滚动步长，同时保留整页绑定。设置 `"tui.altScreen.pageUp": []` 可完全禁用该转录快捷键。用户绑定会替换该动作的默认值。
+此路由可通过普通动作绑定配置。例如，`"tui.altScreen.pageUp": "ctrl+pageUp"` 使 `pageUp` 控制编辑器，`ctrl+pageUp` 在全屏模式中控制转录。绑定 `tui.altScreen.halfPageUp` 和 `tui.altScreen.halfPageDown` 可实现半页步长，或绑定 `tui.altScreen.lineUp` 和 `tui.altScreen.lineDown` 实现单行步长。设置 `"tui.altScreen.pageUp": []` 可完全禁用该转录快捷键。用户绑定会替换该动作的默认值。
 
 | 按键绑定 ID | 默认值 | 描述 |
 |--------|---------|-------------|
@@ -101,8 +101,14 @@
 | `tui.altScreen.pageDown` | `pageDown` | 将转录向下滚动一页 |
 | `tui.altScreen.halfPageUp` | *（无）* | 将转录向上滚动半页 |
 | `tui.altScreen.halfPageDown` | *（无）* | 将转录向下滚动半页 |
+| `tui.altScreen.lineUp` | *（无）* | 将转录向上滚动一行 |
+| `tui.altScreen.lineDown` | *（无）* | 将转录向下滚动一行 |
 | `tui.altScreen.previousPrompt` | `ctrl+shift+up` | 跳到上一条标记的消息 |
 | `tui.altScreen.nextPrompt` | `ctrl+shift+down` | 跳到下一条标记的消息 |
+| `tui.altScreen.search` | `ctrl+shift+f` | 搜索渲染后的转录内容 |
+| `tui.altScreen.searchNext` | `enter`, `ctrl+g` | 搜索时选择下一个匹配项 |
+| `tui.altScreen.searchPrevious` | `shift+enter`, `ctrl+shift+g` | 搜索时选择上一个匹配项 |
+| `tui.altScreen.searchClose` | `escape` | 关闭转录搜索 |
 | `tui.altScreen.top` | `home` | 滚动到转录开头 |
 | `tui.altScreen.bottom` | `end` | 滚动到转录末尾并跟随新输出 |
 

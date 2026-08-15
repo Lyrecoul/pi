@@ -77,8 +77,9 @@ describe("i18n", () => {
 			expect(t("Trust parent folder ({path})", { path: "/home/u" })).toBe("信任父文件夹（/home/u）");
 			expect(
 				t(
-					"Trust project folder?\n{cwd}\n\nThis allows pi to load {configDir} settings and resources, install missing project packages, and execute project extensions.",
+					"Trust project folder?\n{cwd}\n\nThis allows {app} to load {configDir} settings and resources, install missing project packages, and execute project extensions.",
 					{
+						app: "pi",
 						cwd: "/repo",
 						configDir: ".pi",
 					},

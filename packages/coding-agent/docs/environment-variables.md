@@ -3,14 +3,19 @@
 Pi 以三种方式使用环境变量：
 
 - 诸如 `PI_OFFLINE` 之类的变量用于配置 Pi 进程。
-- Pi 设置 `PI_CODING_AGENT`，以便子进程可以检测到自己运行在 Pi 内部。
+- Pi 设置进程标记，以便子进程可以将 Pi 识别为启动代理。
 - 由可调用 LLM 的 bash 工具运行的命令会收到描述当前会话的 `PI_*` 变量。
 
 提供商 API 密钥变量在[提供商](providers.md#environment-variables-or-auth-file)中单独说明。
 
 ## 进程标记
 
-CLI 和 RPC 入口点设置 `PI_CODING_AGENT=true`。子进程会继承它，并可用它来检测自己运行在 Pi 内部。它不是会话特定的，并且当 Pi 通过 SDK 嵌入时不会自动设置。
+CLI 和 RPC 入口点设置两个进程标记：
+
+- `AI_AGENT=pi` 是通用标记，让工具可以识别 Pi 是启动进程的代理。
+- `PI_CODING_AGENT=true` 是 Pi 特有的标记，让子进程可以检测到自己运行在 Pi 内部。
+
+子进程会继承这两个标记。它们不是会话特定的，并且当 Pi 通过 SDK 嵌入时不会自动设置。
 
 ## Bash 工具的会话环境
 
@@ -83,6 +88,7 @@ const bashTool = createBashTool(cwd, {
 | `LC_ALL`, `LC_MESSAGES`, `LANG` | 当 `language` 设置为 `"auto"` 时选择 UI 语言：按 `LC_ALL`、`LC_MESSAGES`、`LANG` 的顺序检测，`zh*` 选择简体中文，`en*` 选择英语，其他值回退到英语 |
 | `PI_SHARE_VIEWER_URL` | 覆盖 `/share` 使用的基础 URL |
 | `PI_HARDWARE_CURSOR` | 设为 `1` 以显示硬件光标；参见[终端配置](terminal-setup.md) |
+| `PI_TUI_ESC_TIMEOUT` | 单独的 ESC 之后、将其视为 Escape 之前的等待毫秒数；SSH 下默认为 `100`，其他情况为 `10`。如果 Alt 键输入被误读为 Escape，可增大此值 |
 | `VISUAL`, `EDITOR` | 当 `externalEditor` 未设置时作为外部编辑器回退 |
 | `HTTP_PROXY`, `HTTPS_PROXY` | 为出站 HTTP 请求设置代理 |
 
